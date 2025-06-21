@@ -13,9 +13,6 @@ const nextConfig = {
   output: 'export',
   trailingSlash: true,
   // Optimize for deployment
-  experimental: {
-    optimizeCss: true,
-  },
   // Add environment variables for build
   env: {
     CUSTOM_KEY: 'portfolio',
