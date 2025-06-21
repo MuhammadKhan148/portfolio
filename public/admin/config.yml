@@ -1,0 +1,37 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/uploads"
+public_folder: "/uploads"
+
+collections:
+  - name: "settings"
+    label: "Portfolio Settings"
+    files:
+      - label: "Portfolio Info"
+        name: "portfolio"
+        file: "content/portfolio.md"
+        fields:
+          - { label: "Name", name: "name", widget: "string" }
+          - { label: "Title", name: "title", widget: "string" }
+          - { label: "Bio", name: "bio", widget: "text" }
+          - { label: "Profile Image", name: "profile_image", widget: "image" }
+          - { label: "Resume PDF", name: "resume", widget: "file" }
+          - { label: "GitHub URL", name: "github", widget: "string" }
+          - { label: "LinkedIn URL", name: "linkedin", widget: "string" }
+          - { label: "Email", name: "email", widget: "string" }
+  
+  - name: "projects"
+    label: "Projects"
+    folder: "content/projects"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "Description", name: "description", widget: "text" }
+      - { label: "Featured Image", name: "image", widget: "image" }
+      - { label: "Tags", name: "tags", widget: "list" }
+      - { label: "GitHub URL", name: "github", widget: "string" }
+      - { label: "Demo URL", name: "demo", widget: "string" }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false } 
