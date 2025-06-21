@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://muhammad-abdullah-khan.netlify.app/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1 
