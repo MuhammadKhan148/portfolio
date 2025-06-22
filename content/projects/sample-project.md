@@ -1,28 +1,34 @@
 ---
-title: "Sample Project"
-description: "This is a sample project to demonstrate the admin panel functionality"
+title: "AI Movie Recommender"
+description: "Emotion-aware movie recommender with 82% emotion-match accuracy. Uses TensorFlow and Flask for intelligent content suggestions."
 image: "/projects/ai-movie-recommender.jpg"
 tags: 
-  - "React"
-  - "TypeScript"
-  - "Next.js"
-github: "https://github.com/yourusername/sample-project"
-demo: "https://sample-project.demo.com"
+  - "Python"
+  - "TensorFlow"
+  - "Flask"
+  - "AI/ML"
+  - "Recommender Systems"
+github: "https://github.com/MuhammadKhan148/ai-movie-recommender"
+demo: "https://ai-movie-recommender.demo.com"
 featured: true
+status: "Completed"
+year: "2024"
 ---
 
-# Sample Project
+# AI Movie Recommender
 
-This is a sample project created to demonstrate how the admin panel works. You can edit this content through the admin interface at `/admin`.
+An advanced emotion-aware movie recommendation system that analyzes user sentiment and emotional patterns to provide personalized movie suggestions with 82% accuracy in emotion-content matching.
 
-## Features
+## Key Features
 
-- Feature 1
-- Feature 2
-- Feature 3
+- **Emotion Detection**: Real-time sentiment analysis of user preferences
+- **Smart Recommendations**: TensorFlow-powered recommendation engine
+- **High Accuracy**: 82% emotion-match accuracy rate
+- **Scalable Architecture**: Flask-based backend with efficient processing
 
-## Tech Stack
+## Technical Implementation
 
-- React
-- TypeScript
-- Next.js 
+- **Machine Learning**: Custom TensorFlow models for sentiment analysis
+- **Backend**: Flask REST API with optimized recommendation algorithms
+- **Data Processing**: Advanced feature extraction and emotion mapping
+- **Performance**: Sub-second recommendation generation 
