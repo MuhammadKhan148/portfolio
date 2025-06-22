@@ -8,8 +8,6 @@ resume: "/files/resume.pdf"
 github: "https://github.com/MuhammadKhan148"
 linkedin: "https://linkedin.com/in/yourprofile"
 email: "muhammad.mak252@gmail.com"
-
-# Experience
 experience:
   - title: "Freelance Full-Stack & AI Developer"
     company: "Fiverr"
@@ -20,7 +18,6 @@ experience:
       - "Completed 60+ contracts with zero revisions on 80% of orders"
       - "Applied research-style A/B testing and model benchmarks"
       - "Built emotion-aware systems adopted by two client startups"
-  
   - title: "Lab Demonstrator"
     company: "Programming Fundamentals (PF), FAST-NUCES"
     duration: "Feb 2024 – Present"
@@ -30,8 +27,6 @@ experience:
       - "Built automated grading script cutting marking time by 40%"
       - "Improved feedback consistency across all students"
       - "Mentored students in coding fundamentals and best practices"
-
-# Skills
 skills:
   ai_ml:
     - "Python"
@@ -40,7 +35,6 @@ skills:
     - "Sentiment Analysis"
     - "Recommender Systems"
     - "Machine Learning"
-  
   frontend:
     - "React"
     - "Next.js"
@@ -48,7 +42,6 @@ skills:
     - "HTML/CSS"
     - "Flutter"
     - "PWA"
-  
   backend:
     - "Node.js"
     - "MongoDB"
@@ -56,7 +49,6 @@ skills:
     - "Firebase"
     - "REST APIs"
     - "GraphQL"
-  
   devops:
     - "Docker"
     - "Kubernetes"
@@ -64,8 +56,6 @@ skills:
     - "AWS"
     - "CI/CD"
     - "Git"
-
-# Stats
 stats:
   projects: "24+"
   rating: "100%"
@@ -74,8 +64,6 @@ stats:
   approach: "Research-Oriented"
   quality: "Clean Code"
   role: "Lab Demonstrator"
-
-# Achievements
 achievements:
   open_source: "24 public repositories with flagship AIMovieRecommender ⭐150+"
   competitions: "1st Place – FAST Marathon; Winner – Twin-City Swimming; Finalist – National Critical-Thinking Tournament"
