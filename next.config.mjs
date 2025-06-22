@@ -9,8 +9,8 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Enable static export for Netlify
-  output: 'export',
+  // Temporarily disable static export to enable API routes
+  // output: 'export',
   trailingSlash: true,
   // Optimize for deployment
   // Add environment variables for build

@@ -193,6 +193,7 @@ export default function AdminPanel() {
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [draggedItem, setDraggedItem] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState(true)
+    const [isSaving, setIsSaving] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
     // Real portfolio data state - initialized with your actual data
@@ -430,25 +431,52 @@ export default function AdminPanel() {
     }
 
     const handleSave = async () => {
-        const data = {
-            personalInfo,
-            experiences,
-            projects,
-            skills,
-            testimonials,
-            siteSettings,
-            lastUpdated: new Date().toISOString()
-        }
+        setIsSaving(true)
+        try {
+            // Save portfolio data
+            const portfolioResponse = await fetch('/api/admin/save-portfolio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ personalInfo, experiences, skills })
+            })
 
-        // Save to localStorage (auto-saved already, but explicit save)
-        localStorage.setItem("portfolioAdminData", JSON.stringify(data))
-        setHasUnsavedChanges(false)
-        alert("Portfolio saved to local storage! Use Export to download updated files.")
+            if (!portfolioResponse.ok) throw new Error('Failed to save portfolio')
+
+            // Save projects data
+            const projectsResponse = await fetch('/api/admin/save-projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ projects })
+            })
+
+            if (!projectsResponse.ok) throw new Error('Failed to save projects')
+
+            const data = {
+                personalInfo,
+                experiences,
+                projects,
+                skills,
+                testimonials,
+                siteSettings,
+                lastUpdated: new Date().toISOString()
+            }
+
+            // Also save to localStorage as backup
+            localStorage.setItem("portfolioAdminData", JSON.stringify(data))
+            setHasUnsavedChanges(false)
+
+            alert("✅ Portfolio saved successfully! Files updated and ready for deployment.")
+        } catch (error) {
+            console.error('Save error:', error)
+            alert("❌ Failed to save portfolio. Please try again.")
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     const handlePublish = async () => {
         await handleSave()
-        alert("Portfolio saved! Remember to export your data and update the markdown files for live deployment.")
+        alert("🚀 Portfolio published! Changes are now live and will be deployed automatically.")
     }
 
     const handleExportMarkdown = () => {
@@ -576,18 +604,19 @@ achievements:
                         </div>
                         <Button
                             onClick={handleSave}
-                            disabled={!hasUnsavedChanges}
+                            disabled={!hasUnsavedChanges || isSaving}
                             variant="outline"
                             className="border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50"
                         >
                             <Save className="mr-2 h-4 w-4" />
-                            Save Draft
+                            {isSaving ? "Saving..." : "Save Draft"}
                         </Button>
                         <Button
                             onClick={handlePublish}
+                            disabled={isSaving}
                             className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
                         >
-                            Publish Live
+                            {isSaving ? "Publishing..." : "Publish Live"}
                         </Button>
                         <Button variant="outline" asChild>
                             <Link href="/" target="_blank" rel="noreferrer">
