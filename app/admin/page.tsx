@@ -433,23 +433,162 @@ export default function AdminPanel() {
     const handleSave = async () => {
         setIsSaving(true)
         try {
-            // Save portfolio data
-            const portfolioResponse = await fetch('/api/admin/save-portfolio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ personalInfo, experiences, skills })
+            // GitHub API configuration
+            const GITHUB_TOKEN = localStorage.getItem('githubToken')
+            const REPO_OWNER = 'MuhammadKhan148'
+            const REPO_NAME = 'portfolio'
+            const BRANCH = 'main'
+
+            if (!GITHUB_TOKEN) {
+                const token = prompt(`To save directly to GitHub, please enter your GitHub Personal Access Token (PAT):\n\n1. Go to: https://github.com/settings/tokens\n2. Click "Generate new token (classic)"\n3. Select "repo" scope\n4. Copy and paste the token here:\n\nNote: Token will be saved locally for future use.`)
+                if (!token) {
+                    alert('❌ GitHub token required for direct saving. Using localStorage only.')
+                    setIsSaving(false)
+                    return
+                }
+                localStorage.setItem('githubToken', token)
+            }
+
+            const token = localStorage.getItem('githubToken')
+
+            // Generate portfolio.md content
+            const portfolioContent = `---
+name: "${personalInfo.name}"
+title: "${personalInfo.title}"
+bio: "${personalInfo.bio}"
+availability_status: "${personalInfo.availability}"
+profile_image: "${personalInfo.avatar}"
+resume: "/files/resume.pdf"
+github: "${personalInfo.github}"
+linkedin: "${personalInfo.linkedin}"
+email: "${personalInfo.email}"
+experience:
+${experiences.map(exp => `  - title: "${exp.title}"
+    company: "${exp.company}"
+    duration: "${exp.period}"
+    location: "${exp.location}"
+    description: "${exp.description}"
+    achievements:
+${exp.achievements.map(ach => `      - "${ach}"`).join('\n')}`).join('\n')}
+skills:
+  ai_ml:
+${skills.filter(s => s.category === 'AI/ML').map(s => `    - "${s.name}"`).join('\n')}
+  frontend:
+${skills.filter(s => s.category === 'Frontend').map(s => `    - "${s.name}"`).join('\n')}
+  backend:
+${skills.filter(s => s.category === 'Backend').map(s => `    - "${s.name}"`).join('\n')}
+  devops:
+${skills.filter(s => s.category === 'DevOps').map(s => `    - "${s.name}"`).join('\n')}
+stats:
+  projects: "${personalInfo.projectsCompleted}+"
+  rating: "100%"
+  specialty: "AI/ML Specialist"
+  type: "Full-Stack Developer"
+  approach: "Research-Oriented"
+  quality: "Clean Code"
+  role: "Lab Demonstrator"
+achievements:
+  open_source: "24 public repositories with flagship AIMovieRecommender ⭐150+"
+  competitions: "1st Place – FAST Marathon; Winner – Twin-City Swimming; Finalist – National Critical-Thinking Tournament"
+  innovation: "Emotion-aware UX adopted by two client startups"
+---`
+
+            // Get current file SHA for portfolio.md
+            const portfolioFileResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/portfolio.md`, {
+                headers: { 'Authorization': `token ${token}` }
             })
 
-            if (!portfolioResponse.ok) throw new Error('Failed to save portfolio')
+            let portfolioSha = ''
+            if (portfolioFileResponse.ok) {
+                const portfolioFileData = await portfolioFileResponse.json()
+                portfolioSha = portfolioFileData.sha
+            }
 
-            // Save projects data
-            const projectsResponse = await fetch('/api/admin/save-projects', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ projects })
+            // Update portfolio.md
+            const updatePortfolioResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/portfolio.md`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `token ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: 'Update portfolio data via admin panel',
+                    content: btoa(unescape(encodeURIComponent(portfolioContent))),
+                    sha: portfolioSha,
+                    branch: BRANCH
+                })
             })
 
-            if (!projectsResponse.ok) throw new Error('Failed to save projects')
+            if (!updatePortfolioResponse.ok) {
+                throw new Error('Failed to update portfolio.md')
+            }
+
+            // Update project files
+            for (const project of projects) {
+                const fileName = project.title.toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-|-$/g, '') + '.md'
+
+                const projectContent = `---
+title: "${project.title}"
+description: "${project.description}"
+image: "${project.image}"
+tags: 
+${project.tags.map(tag => `  - "${tag}"`).join('\n')}
+github: "${project.github}"
+demo: "${project.demo}"
+featured: ${project.featured}
+status: "Completed"
+year: "2024"
+---
+
+# ${project.title}
+
+${project.description}
+
+## Key Features
+
+- Advanced functionality and performance optimization
+- Modern architecture and best practices
+- Comprehensive testing and documentation
+- Production-ready deployment
+
+## Technical Stack
+
+${project.tags.map(tag => `- **${tag}**: Core technology component`).join('\n')}
+
+## Links
+
+- [GitHub Repository](${project.github})
+- [Live Demo](${project.demo})
+`
+
+                // Get current file SHA
+                const projectFileResponse = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/projects/${fileName}`, {
+                    headers: { 'Authorization': `token ${token}` }
+                })
+
+                let projectSha = ''
+                if (projectFileResponse.ok) {
+                    const projectFileData = await projectFileResponse.json()
+                    projectSha = projectFileData.sha
+                }
+
+                // Update project file
+                await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/projects/${fileName}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: `Update ${project.title} project via admin panel`,
+                        content: btoa(unescape(encodeURIComponent(projectContent))),
+                        sha: projectSha,
+                        branch: BRANCH
+                    })
+                })
+            }
 
             const data = {
                 personalInfo,
@@ -465,10 +604,15 @@ export default function AdminPanel() {
             localStorage.setItem("portfolioAdminData", JSON.stringify(data))
             setHasUnsavedChanges(false)
 
-            alert("✅ Portfolio saved successfully! Files updated and ready for deployment.")
+            alert("✅ Portfolio saved successfully to GitHub! Netlify will auto-deploy in 2-3 minutes.")
         } catch (error) {
             console.error('Save error:', error)
-            alert("❌ Failed to save portfolio. Please try again.")
+            if (error.message?.includes('Bad credentials')) {
+                localStorage.removeItem('githubToken')
+                alert("❌ Invalid GitHub token. Please try again with a valid token.")
+            } else {
+                alert("❌ Failed to save portfolio. Please check your GitHub token and try again.")
+            }
         } finally {
             setIsSaving(false)
         }
