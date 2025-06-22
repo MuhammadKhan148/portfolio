@@ -146,29 +146,60 @@ export default function AdminPanel() {
 
     const loadPortfolioData = async () => {
         try {
-            const response = await fetch('/api/admin/portfolio')
-            if (response.ok) {
-                const data = await response.json()
-                // Restructure data to match our interface
-                const restructuredData: PortfolioData = {
-                    personal: {
-                        name: data.name || "",
-                        title: data.title || "",
-                        bio: data.bio || "",
-                        email: data.email || "",
-                        github: data.github || "",
-                        linkedin: data.linkedin || "",
-                        profile_image: data.profile_image || "",
-                        availability_status: data.availability_status || "",
-                        resume: data.resume || "",
+            // Load sample data for demo (in a real implementation, you'd need a different approach for static sites)
+            const sampleData: PortfolioData = {
+                personal: {
+                    name: "Muhammad Abdullah Khan",
+                    title: "AI-Focused Software Engineer & Full-Stack Developer",
+                    bio: "Passionate about building emotion-aware systems and conversational AI. 24+ open-source projects, 100% ★5 freelance record.",
+                    email: "contact@example.com",
+                    github: "https://github.com/MuhammadKhan148",
+                    linkedin: "https://linkedin.com/in/muhammad-abdullah-khan",
+                    profile_image: "/placeholder-user.jpg",
+                    availability_status: "Available for projects",
+                    resume: "/files/resume.pdf",
+                },
+                experience: [
+                    {
+                        title: "Freelance Software Developer",
+                        company: "Fiverr",
+                        duration: "2018 - Present",
+                        location: "Remote",
+                        description: "Full-stack development with perfect client satisfaction rate",
+                        achievements: ["100% ★5 Rating", "50+ Projects Completed", "Expert-level Seller"]
                     },
-                    experience: data.experience || [],
-                    skills: data.skills || { ai_ml: [], frontend: [], backend: [], devops: [] },
-                    stats: data.stats || { projects: "", rating: "", specialty: "", type: "", approach: "", quality: "", role: "" },
-                    achievements: data.achievements || { open_source: "", competitions: "", innovation: "" },
+                    {
+                        title: "Lab Demonstrator",
+                        company: "FAST-NUCES",
+                        duration: "2024 - Present",
+                        location: "Karachi, Pakistan",
+                        description: "Teaching assistant for computer science courses",
+                        achievements: ["Student Mentoring", "Lab Supervision", "Course Material Development"]
+                    }
+                ],
+                skills: {
+                    ai_ml: ["Python", "TensorFlow", "PyTorch", "OpenCV", "NLP", "Machine Learning"],
+                    frontend: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Vue.js"],
+                    backend: ["Node.js", "Express", "FastAPI", "PostgreSQL", "MongoDB"],
+                    devops: ["Docker", "Git", "Linux", "CI/CD", "AWS"]
+                },
+                stats: {
+                    projects: "24+",
+                    rating: "100% ★5",
+                    specialty: "AI & Full-Stack",
+                    type: "Emotion-Aware Systems",
+                    approach: "User-Centric Design",
+                    quality: "Production-Ready",
+                    role: "Technical Lead"
+                },
+                achievements: {
+                    open_source: "24+ GitHub repositories",
+                    competitions: "Multiple hackathon wins",
+                    innovation: "Emotion-aware AI systems"
                 }
-                setPortfolioData(restructuredData)
             }
+
+            setPortfolioData(sampleData)
         } catch (error) {
             console.error('Error loading portfolio data:', error)
         } finally {
@@ -178,11 +209,44 @@ export default function AdminPanel() {
 
     const loadProjects = async () => {
         try {
-            const response = await fetch('/api/admin/projects')
-            if (response.ok) {
-                const data = await response.json()
-                setProjects(data)
-            }
+            // Load sample projects for demo
+            const sampleProjects: Project[] = [
+                {
+                    title: "AI Movie Recommender",
+                    description: "Intelligent movie recommendation system using machine learning algorithms to suggest personalized content based on user preferences and viewing history.",
+                    image: "/projects/ai-movie-recommender.jpg",
+                    tags: ["Python", "Machine Learning", "Flask", "React", "TensorFlow"],
+                    github: "https://github.com/MuhammadKhan148/ai-movie-recommender",
+                    demo: "https://ai-movie-recommender.netlify.app",
+                    featured: true,
+                    status: "Completed",
+                    year: "2024"
+                },
+                {
+                    title: "Emotion-Aware Conversational AI",
+                    description: "Advanced chatbot that recognizes and responds to human emotions, providing empathetic and contextually appropriate interactions.",
+                    image: "/projects/emotion-ai.jpg",
+                    tags: ["Python", "NLP", "OpenAI", "Emotion Recognition", "Flask"],
+                    github: "https://github.com/MuhammadKhan148/emotion-aware-ai",
+                    demo: "https://emotion-ai-chat.netlify.app",
+                    featured: true,
+                    status: "Completed",
+                    year: "2024"
+                },
+                {
+                    title: "Python Chess Engine",
+                    description: "High-performance chess engine with AI opponent, move validation, and advanced game analysis features.",
+                    image: "/projects/chess-engine.jpg",
+                    tags: ["Python", "AI", "Game Development", "Algorithms"],
+                    github: "https://github.com/MuhammadKhan148/python-chess-engine",
+                    demo: "https://python-chess-demo.netlify.app",
+                    featured: false,
+                    status: "Completed",
+                    year: "2023"
+                }
+            ]
+
+            setProjects(sampleProjects)
         } catch (error) {
             console.error('Error loading projects:', error)
         }
@@ -191,35 +255,28 @@ export default function AdminPanel() {
     const handleSave = async () => {
         setIsSaving(true)
         try {
-            // Flatten personal data for saving
-            const flattenedData = {
-                ...portfolioData.personal,
+            // Simulate save operation for demo
+            await new Promise(resolve => setTimeout(resolve, 1000))
+
+            // In a real implementation, you would need to:
+            // 1. Use a backend API to save data
+            // 2. Or implement a file-based CMS solution
+            // 3. Or integrate with a headless CMS like Strapi/Contentful
+
+            const dataToExport = {
+                personal: portfolioData.personal,
                 experience: portfolioData.experience,
                 skills: portfolioData.skills,
                 stats: portfolioData.stats,
                 achievements: portfolioData.achievements,
+                projects: projects
             }
 
-            // Save portfolio data
-            const portfolioResponse = await fetch('/api/admin/portfolio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(flattenedData),
-            })
+            // Save to localStorage for demo purposes
+            localStorage.setItem('portfolio-data', JSON.stringify(dataToExport))
 
-            // Save projects data
-            const projectsResponse = await fetch('/api/admin/projects', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(projects),
-            })
-
-            if (portfolioResponse.ok && projectsResponse.ok) {
-                setHasUnsavedChanges(false)
-                alert('✅ Portfolio saved successfully!')
-            } else {
-                alert('❌ Error saving portfolio')
-            }
+            setHasUnsavedChanges(false)
+            alert('✅ Portfolio saved to local storage (demo mode)!\n\n📋 To implement real saving:\n- Set up a backend API\n- Use a headless CMS\n- Or modify the static files directly')
         } catch (error) {
             console.error('Error saving:', error)
             alert('❌ Error saving portfolio')
@@ -287,7 +344,7 @@ export default function AdminPanel() {
 
             <div className="container py-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                    <TabsList className="grid w-full grid-cols-3 bg-white border border-slate-200 shadow-sm">
+                    <TabsList className="grid w-full grid-cols-4 bg-white border border-slate-200 shadow-sm">
                         <TabsTrigger value="personal" className="flex items-center space-x-2">
                             <User className="h-4 w-4" />
                             <span className="hidden sm:inline">Personal</span>
@@ -295,6 +352,10 @@ export default function AdminPanel() {
                         <TabsTrigger value="experience" className="flex items-center space-x-2">
                             <Briefcase className="h-4 w-4" />
                             <span className="hidden sm:inline">Experience</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="skills" className="flex items-center space-x-2">
+                            <Code className="h-4 w-4" />
+                            <span className="hidden sm:inline">Skills</span>
                         </TabsTrigger>
                         <TabsTrigger value="projects" className="flex items-center space-x-2">
                             <FolderOpen className="h-4 w-4" />
@@ -390,12 +451,143 @@ export default function AdminPanel() {
 
                     {/* Experience Tab */}
                     <TabsContent value="experience" className="space-y-6">
-                        <Card className="border-0 shadow-lg">
-                            <CardHeader>
-                                <CardTitle>Work Experience</CardTitle>
-                                <CardDescription>Coming soon - experience management</CardDescription>
-                            </CardHeader>
-                        </Card>
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h2 className="text-2xl font-bold">Work Experience</h2>
+                                <p className="text-slate-600">Manage your professional experience. Edit and reorder as needed.</p>
+                            </div>
+                            <Button
+                                onClick={() => {
+                                    const newExp: Experience = {
+                                        title: "New Position",
+                                        company: "Company Name",
+                                        duration: "2024 - Present",
+                                        location: "Location",
+                                        description: "Job description...",
+                                        achievements: ["Achievement 1"],
+                                    }
+                                    setPortfolioData(prev => ({
+                                        ...prev,
+                                        experience: [newExp, ...prev.experience]
+                                    }))
+                                    setHasUnsavedChanges(true)
+                                }}
+                                className="bg-gradient-to-r from-emerald-600 to-teal-600"
+                            >
+                                <Plus className="mr-2 h-4 w-4" />
+                                Add Experience
+                            </Button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {portfolioData.experience.map((exp, index) => (
+                                <Card key={index} className="border-0 shadow-lg hover:shadow-xl transition-all duration-300">
+                                    <CardContent className="p-6">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <span className="text-sm text-slate-500">#{index + 1}</span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => {
+                                                    setPortfolioData(prev => ({
+                                                        ...prev,
+                                                        experience: prev.experience.filter((_, i) => i !== index)
+                                                    }))
+                                                    setHasUnsavedChanges(true)
+                                                }}
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+
+                                        <div className="grid gap-4 md:grid-cols-2">
+                                            <div>
+                                                <Label>Job Title</Label>
+                                                <Input
+                                                    value={exp.title}
+                                                    onChange={(e) => {
+                                                        setPortfolioData(prev => ({
+                                                            ...prev,
+                                                            experience: prev.experience.map((item, i) =>
+                                                                i === index ? { ...item, title: e.target.value } : item
+                                                            )
+                                                        }))
+                                                        setHasUnsavedChanges(true)
+                                                    }}
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Company</Label>
+                                                <Input
+                                                    value={exp.company}
+                                                    onChange={(e) => {
+                                                        setPortfolioData(prev => ({
+                                                            ...prev,
+                                                            experience: prev.experience.map((item, i) =>
+                                                                i === index ? { ...item, company: e.target.value } : item
+                                                            )
+                                                        }))
+                                                        setHasUnsavedChanges(true)
+                                                    }}
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Duration</Label>
+                                                <Input
+                                                    value={exp.duration}
+                                                    onChange={(e) => {
+                                                        setPortfolioData(prev => ({
+                                                            ...prev,
+                                                            experience: prev.experience.map((item, i) =>
+                                                                i === index ? { ...item, duration: e.target.value } : item
+                                                            )
+                                                        }))
+                                                        setHasUnsavedChanges(true)
+                                                    }}
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                            <div>
+                                                <Label>Location</Label>
+                                                <Input
+                                                    value={exp.location}
+                                                    onChange={(e) => {
+                                                        setPortfolioData(prev => ({
+                                                            ...prev,
+                                                            experience: prev.experience.map((item, i) =>
+                                                                i === index ? { ...item, location: e.target.value } : item
+                                                            )
+                                                        }))
+                                                        setHasUnsavedChanges(true)
+                                                    }}
+                                                    className="mt-1"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div className="mt-4">
+                                            <Label>Description</Label>
+                                            <Textarea
+                                                value={exp.description}
+                                                onChange={(e) => {
+                                                    setPortfolioData(prev => ({
+                                                        ...prev,
+                                                        experience: prev.experience.map((item, i) =>
+                                                            i === index ? { ...item, description: e.target.value } : item
+                                                        )
+                                                    }))
+                                                    setHasUnsavedChanges(true)
+                                                }}
+                                                className="mt-1"
+                                            />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </div>
                     </TabsContent>
 
                     {/* Projects Tab */}
