@@ -29,6 +29,8 @@ import { useState, useEffect } from "react"
 
 export default function Portfolio() {
   const [isScrolled, setIsScrolled] = useState(false)
+  const [gitHubProjects, setGitHubProjects] = useState<any[]>([])
+  const [isLoadingProjects, setIsLoadingProjects] = useState(true)
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,6 +39,18 @@ export default function Portfolio() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  useEffect(() => {
+    // Load GitHub projects on component mount
+    loadGitHubProjects()
+  }, [])
+
+  const loadGitHubProjects = async () => {
+    setIsLoadingProjects(true)
+    const projects = await fetchGitHubProjects()
+    setGitHubProjects(projects)
+    setIsLoadingProjects(false)
+  }
 
   // Structured data for SEO
   const structuredData = {
@@ -70,6 +84,87 @@ export default function Portfolio() {
       "TensorFlow",
       "Flutter"
     ]
+  }
+
+  // Add GitHub integration
+  const fetchGitHubProjects = async () => {
+    try {
+      // Fetch repositories from GitHub API
+      const response = await fetch('https://api.github.com/users/MuhammadKhan148/repos?sort=updated&per_page=50', {
+        headers: {
+          'Accept': 'application/vnd.github.v3+json',
+        },
+      })
+
+      if (!response.ok) throw new Error('Failed to fetch GitHub repos')
+
+      const repos = await response.json()
+
+      // Filter and transform repositories
+      const portfolioProjects = repos
+        .filter((repo: any) => {
+          // Only show repos that should be in portfolio
+          return !repo.fork && // Not a fork
+            !repo.private && // Public repos only
+            repo.description && // Has description
+            !repo.name.includes('.github') && // Not meta repos
+            !repo.name.includes('config') && // Not config repos
+            repo.stargazers_count >= 0 && // Any stars (including 0)
+            (repo.topics?.includes('portfolio') ||
+              repo.topics?.includes('project') ||
+              repo.language ||
+              repo.description.toLowerCase().includes('project') ||
+              repo.description.toLowerCase().includes('app') ||
+              repo.description.toLowerCase().includes('website'))
+        })
+        .slice(0, 6) // Show top 6 projects
+        .map((repo: any) => ({
+          id: repo.id.toString(),
+          title: repo.name
+            .split('-')
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' '),
+          description: repo.description || 'A GitHub project',
+          image: `https://opengraph.githubassets.com/1/${repo.full_name}`,
+          tags: [
+            ...(repo.language ? [repo.language] : []),
+            ...(repo.topics?.slice(0, 4) || []),
+          ].filter(Boolean),
+          github: repo.html_url,
+          demo: repo.homepage || repo.html_url,
+          featured: repo.stargazers_count > 2 || repo.topics?.includes('featured'),
+          stars: repo.stargazers_count,
+          language: repo.language,
+          updated: repo.updated_at,
+        }))
+
+      return portfolioProjects
+    } catch (error) {
+      console.error('Error fetching GitHub projects:', error)
+      // Return fallback projects if GitHub API fails
+      return [
+        {
+          id: "1",
+          title: "AI Movie Recommender",
+          description: "Intelligent movie recommendation system using machine learning algorithms",
+          image: "/projects/ai-movie-recommender.jpg",
+          tags: ["Python", "Machine Learning", "Flask", "React"],
+          github: "https://github.com/MuhammadKhan148/ai-movie-recommender",
+          demo: "https://ai-movie-recommender.netlify.app",
+          featured: true,
+        },
+        {
+          id: "2",
+          title: "Emotion-Aware Conversational AI",
+          description: "Advanced chatbot that recognizes and responds to human emotions",
+          image: "/projects/emotion-ai.jpg",
+          tags: ["Python", "NLP", "OpenAI", "Emotion Recognition"],
+          github: "https://github.com/MuhammadKhan148/emotion-aware-ai",
+          demo: "https://emotion-ai-chat.netlify.app",
+          featured: true,
+        }
+      ]
+    }
   }
 
   return (
@@ -432,137 +527,89 @@ export default function Portfolio() {
             </div>
 
             <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-3">
-              {[
-                {
-                  title: "AI Movie Recommender",
-                  description:
-                    "Emotion-aware movie recommender with 82% emotion-match accuracy. Uses TensorFlow and Flask for intelligent content suggestions.",
-                  image: "/projects/ai-movie-recommender.jpg",
-                  tags: ["Python", "TensorFlow", "Flask", "AI/ML", "Recommender Systems"],
-                  github: "https://github.com/MuhammadKhan148/AIMovieRecommenderProject",
-                  demo: "https://github.com/MuhammadKhan148/AIMovieRecommenderProject",
-                  featured: true,
-                  icon: Brain,
-                },
-                {
-                  title: "Emotion-Aware Conversational AI",
-                  description:
-                    "Real-time chatbot that detects sentiment and serves tailored content with <200ms latency for 500 concurrent users.",
-                  image: "/placeholder.svg?height=300&width=500",
-                  tags: ["Python", "PyTorch", "Socket.IO", "Real-time", "Sentiment Analysis"],
-                  github: "https://github.com/MuhammadKhan148",
-                  demo: "#",
-                  featured: true,
-                  icon: MessageSquare,
-                },
-                {
-                  title: "Python Chess Engine",
-                  description:
-                    "Advanced chess engine using alpha-beta pruning with iterative deepening. Searches 5 ply in ≤50ms for optimal gameplay.",
-                  image: "/placeholder.svg?height=300&width=500",
-                  tags: ["C++", "Python", "Algorithms", "Game Theory", "AI"],
-                  github: "https://github.com/MuhammadKhan148",
-                  demo: "#",
-                  featured: true,
-                  icon: Gamepad2,
-                },
-                {
-                  title: "Social Media Web App (MERN)",
-                  description:
-                    "Full-stack social platform with JWT auth, real-time chat, image uploads, and CI/CD via GitHub Actions & Docker.",
-                  image: "/placeholder.svg?height=300&width=500",
-                  tags: ["MERN Stack", "JWT", "Socket.IO", "Docker", "CI/CD"],
-                  github: "https://github.com/MuhammadKhan148",
-                  demo: "#",
-                  featured: false,
-                  icon: Globe,
-                },
-                {
-                  title: "Airbnb Clone",
-                  description:
-                    "Complete booking platform with advanced search filters, role-based access, and full booking flow implementation.",
-                  image: "/placeholder.svg?height=300&width=500",
-                  tags: ["Node.js", "React", "MongoDB", "Full-Stack", "Booking System"],
-                  github: "https://github.com/MuhammadKhan148",
-                  demo: "#",
-                  featured: false,
-                  icon: Database,
-                },
-                {
-                  title: "Weather App (Flutter)",
-                  description:
-                    "Cross-platform weather app with push notifications, offline caching, and 4k+ beta downloads.",
-                  image: "/placeholder.svg?height=300&width=500",
-                  tags: ["Flutter", "Firebase", "Mobile", "Push Notifications", "Offline"],
-                  github: "https://github.com/MuhammadKhan148",
-                  demo: "#",
-                  featured: false,
-                  icon: Smartphone,
-                },
-              ].map((project, index) => (
-                <Card
-                  key={index}
-                  className={`group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white/90 backdrop-blur-sm hover:scale-105 ${project.featured ? "lg:col-span-2 xl:col-span-1" : ""
-                    }`}
-                >
-                  <div className="relative aspect-video overflow-hidden">
-                    <Image
-                      src={project.image || "/placeholder.svg"}
-                      alt={project.title}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+              {isLoadingProjects ? (
+                // Loading skeleton
+                Array.from({ length: 6 }).map((_, index) => (
+                  <Card key={index} className="overflow-hidden border-0 shadow-lg bg-white/90 backdrop-blur-sm">
+                    <div className="relative aspect-video bg-slate-200 animate-pulse" />
+                    <CardHeader className="pb-3">
+                      <div className="h-6 bg-slate-200 rounded animate-pulse mb-2" />
+                      <div className="h-4 bg-slate-200 rounded animate-pulse w-3/4" />
+                    </CardHeader>
+                    <CardContent className="pt-0">
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="secondary"
-                          className="bg-white/90 hover:bg-white text-slate-900"
-                          asChild
-                        >
-                          <Link href={project.github} target="_blank">
-                            <Github className="mr-2 h-4 w-4" />
-                            Code
-                          </Link>
-                        </Button>
-                        <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" asChild>
-                          <Link href={project.demo} target="_blank">
-                            <ExternalLink className="mr-2 h-4 w-4" />
-                            Demo
-                          </Link>
-                        </Button>
+                        <div className="h-5 w-16 bg-slate-200 rounded animate-pulse" />
+                        <div className="h-5 w-20 bg-slate-200 rounded animate-pulse" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              ) : (
+                gitHubProjects.map((project: any, index: number) => (
+                  <Card
+                    key={index}
+                    className={`group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white/90 backdrop-blur-sm hover:scale-105 ${project.featured ? "lg:col-span-2 xl:col-span-1" : ""
+                      }`}
+                  >
+                    <div className="relative aspect-video overflow-hidden">
+                      <Image
+                        src={project.image || "/placeholder.svg"}
+                        alt={project.title}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-4 group-hover:translate-y-0">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            className="bg-white/90 hover:bg-white text-slate-900"
+                            asChild
+                          >
+                            <Link href={project.github} target="_blank">
+                              <Github className="mr-2 h-4 w-4" />
+                              Code
+                            </Link>
+                          </Button>
+                          <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700" asChild>
+                            <Link href={project.demo} target="_blank">
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Demo
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <CardTitle className="text-xl group-hover:text-emerald-600 transition-colors">
-                        {project.title}
-                      </CardTitle>
-                      {project.featured && (
-                        <Badge className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0">
-                          Featured
-                        </Badge>
-                      )}
-                    </div>
-                    <CardDescription className="text-slate-600 leading-relaxed">{project.description}</CardDescription>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="flex flex-wrap gap-2">
-                      {project.tags.map((tag, i) => (
-                        <Badge
-                          key={i}
-                          variant="outline"
-                          className="text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors"
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <CardTitle className="text-xl group-hover:text-emerald-600 transition-colors">
+                          {project.title}
+                        </CardTitle>
+                        {project.featured && (
+                          <Badge className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0">
+                            Featured
+                          </Badge>
+                        )}
+                      </div>
+                      <CardDescription className="text-slate-600 leading-relaxed">{project.description}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="flex flex-wrap gap-2">
+                        {project.tags.map((tag: string, i: number) => (
+                          <Badge
+                            key={i}
+                            variant="outline"
+                            className="text-xs border-emerald-200 text-emerald-700 hover:bg-emerald-50 transition-colors"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
             </div>
           </div>
         </div>

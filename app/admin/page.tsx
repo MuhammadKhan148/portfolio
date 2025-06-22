@@ -25,8 +25,10 @@ import {
     FolderOpen,
     MessageSquare,
     Palette,
+    Github,
 } from "lucide-react"
 import Image from "next/image"
+import { GitHubSync } from "@/components/github-sync"
 
 // Types for our portfolio data
 interface PersonalInfo {
@@ -268,7 +270,7 @@ export default function AdminPanel() {
 
             <div className="container py-8">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                    <TabsList className="grid w-full grid-cols-6 bg-white border border-slate-200 shadow-sm">
+                    <TabsList className="grid w-full grid-cols-7 bg-white border border-slate-200 shadow-sm">
                         <TabsTrigger value="personal" className="flex items-center space-x-2">
                             <User className="h-4 w-4" />
                             <span className="hidden sm:inline">Personal</span>
@@ -284,6 +286,10 @@ export default function AdminPanel() {
                         <TabsTrigger value="projects" className="flex items-center space-x-2">
                             <FolderOpen className="h-4 w-4" />
                             <span className="hidden sm:inline">Projects</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="github" className="flex items-center space-x-2">
+                            <Github className="h-4 w-4" />
+                            <span className="hidden sm:inline">GitHub</span>
                         </TabsTrigger>
                         <TabsTrigger value="testimonials" className="flex items-center space-x-2">
                             <MessageSquare className="h-4 w-4" />
@@ -889,6 +895,97 @@ export default function AdminPanel() {
                                     </CardContent>
                                 </Card>
                             ))}
+                        </div>
+                    </TabsContent>
+
+                    {/* GitHub Integration Tab */}
+                    <TabsContent value="github" className="space-y-6">
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            {/* GitHub Sync Component */}
+                            <GitHubSync
+                                username="MuhammadKhan148"
+                                onProjectsUpdate={(updatedProjects) => {
+                                    // Update projects when GitHub sync completes
+                                    setProjects(updatedProjects)
+                                    setHasUnsavedChanges(true)
+                                }}
+                            />
+
+                            {/* Webhook Setup Instructions */}
+                            <Card className="border-0 shadow-lg">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center space-x-2">
+                                        <Settings className="h-5 w-5 text-emerald-600" />
+                                        <span>Auto-Deploy Setup</span>
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Set up automatic deployment when you push to GitHub
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-3">
+                                        <div className="flex items-start space-x-3">
+                                            <div className="flex-shrink-0 w-6 h-6 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm font-medium">
+                                                1
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium">Create Netlify Build Hook</h4>
+                                                <p className="text-sm text-slate-600">
+                                                    Go to your Netlify dashboard → Site settings → Build & deploy → Build hooks
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start space-x-3">
+                                            <div className="flex-shrink-0 w-6 h-6 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm font-medium">
+                                                2
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium">Add GitHub Webhook</h4>
+                                                <p className="text-sm text-slate-600">
+                                                    Repository Settings → Webhooks → Add webhook
+                                                </p>
+                                                <div className="mt-2 p-2 bg-slate-50 rounded text-xs font-mono">
+                                                    Payload URL: https://api.netlify.com/build_hooks/[your-hook-id]
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start space-x-3">
+                                            <div className="flex-shrink-0 w-6 h-6 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-sm font-medium">
+                                                3
+                                            </div>
+                                            <div>
+                                                <h4 className="font-medium">Configure Events</h4>
+                                                <p className="text-sm text-slate-600">
+                                                    Select "Push" events to trigger rebuilds
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="border-t pt-4">
+                                        <h4 className="font-medium mb-2">Repository Topics for Portfolio</h4>
+                                        <p className="text-sm text-slate-600 mb-3">
+                                            Add these topics to your GitHub repositories to automatically include them:
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {["portfolio", "project", "featured", "webapp", "website"].map(topic => (
+                                                <Badge key={topic} variant="outline" className="text-xs">
+                                                    {topic}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="bg-emerald-50 p-3 rounded-lg">
+                                        <h4 className="font-medium text-emerald-800 mb-1">🚀 Result</h4>
+                                        <p className="text-sm text-emerald-700">
+                                            Your portfolio will automatically update within 2-3 minutes of pushing code to GitHub!
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                     </TabsContent>
 
