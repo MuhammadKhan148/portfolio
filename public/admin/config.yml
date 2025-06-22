@@ -5,6 +5,13 @@ backend:
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
+# Site settings
+site_url: https://soft-kleicha-9c1587.netlify.app
+display_url: https://soft-kleicha-9c1587.netlify.app
+
+# Make login process smoother
+show_preview_links: true
+
 collections:
   - name: "settings"
     label: "Portfolio Settings"
