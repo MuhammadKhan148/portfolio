@@ -24,29 +24,15 @@ collections:
         name: "personal_info"
         file: "content/portfolio.md"
         fields:
-          - label: "📋 Basic Information"
-            name: "basic_info"
-            widget: "object"
-            fields:
-              - { label: "Full Name", name: "name", widget: "string", hint: "Your full name as it appears on the website" }
-              - { label: "Professional Title", name: "title", widget: "string", hint: "e.g. AI-Focused Software Engineer" }
-              - { label: "Bio/Description", name: "bio", widget: "text", hint: "Main description that appears on your homepage" }
-              - { label: "Availability Status", name: "availability_status", widget: "string", default: "Available for new opportunities" }
-          
-          - label: "🖼️ Images & Files"
-            name: "media"
-            widget: "object"
-            fields:
-              - { label: "Profile Picture", name: "profile_image", widget: "image", hint: "Upload your profile photo" }
-              - { label: "Resume PDF", name: "resume", widget: "file", hint: "Upload your latest resume" }
-          
-          - label: "🔗 Social Links"
-            name: "social"
-            widget: "object"
-            fields:
-              - { label: "GitHub URL", name: "github", widget: "string", hint: "Your GitHub profile link" }
-              - { label: "LinkedIn URL", name: "linkedin", widget: "string", hint: "Your LinkedIn profile link" }
-              - { label: "Email Address", name: "email", widget: "string", hint: "Your contact email" }
+          - { label: "🏷️ Full Name", name: "name", widget: "string", hint: "Your full name as it appears on the website" }
+          - { label: "💼 Professional Title", name: "title", widget: "string", hint: "e.g. AI-Focused Software Engineer" }
+          - { label: "📝 Bio/Description", name: "bio", widget: "text", hint: "Main description that appears on your homepage" }
+          - { label: "📋 Availability Status", name: "availability_status", widget: "string", default: "Available for new opportunities" }
+          - { label: "🖼️ Profile Picture", name: "profile_image", widget: "image", hint: "Upload your profile photo" }
+          - { label: "📄 Resume PDF", name: "resume", widget: "file", hint: "Upload your latest resume" }
+          - { label: "🐙 GitHub URL", name: "github", widget: "string", hint: "Your GitHub profile link" }
+          - { label: "💼 LinkedIn URL", name: "linkedin", widget: "string", hint: "Your LinkedIn profile link" }
+          - { label: "📧 Email Address", name: "email", widget: "string", hint: "Your contact email" }
           
           - label: "💼 Experience"
             name: "experience"
@@ -61,7 +47,7 @@ collections:
               - label: "Key Achievements"
                 name: "achievements"
                 widget: "list"
-                field: { label: "Achievement", name: "achievement", widget: "string" }
+                field: { label: "Achievement", name: "item", widget: "string" }
           
           - label: "🛠️ Skills & Technologies"
             name: "skills"
@@ -70,19 +56,19 @@ collections:
               - label: "AI/ML Skills"
                 name: "ai_ml"
                 widget: "list"
-                field: { label: "Skill", name: "skill", widget: "string" }
+                field: { label: "Skill", name: "item", widget: "string" }
               - label: "Frontend Skills"
                 name: "frontend"
                 widget: "list"
-                field: { label: "Skill", name: "skill", widget: "string" }
+                field: { label: "Skill", name: "item", widget: "string" }
               - label: "Backend Skills"
                 name: "backend"
                 widget: "list"
-                field: { label: "Skill", name: "skill", widget: "string" }
+                field: { label: "Skill", name: "item", widget: "string" }
               - label: "DevOps & Tools"
                 name: "devops"
                 widget: "list"
-                field: { label: "Skill", name: "skill", widget: "string" }
+                field: { label: "Skill", name: "item", widget: "string" }
           
           - label: "📊 Portfolio Stats"
             name: "stats"
@@ -126,7 +112,7 @@ collections:
       - label: "Technologies Used"
         name: "tags"
         widget: "list"
-        field: { label: "Technology", name: "tag", widget: "string" }
+        field: { label: "Technology", name: "item", widget: "string" }
         hint: "Technologies/frameworks used in this project"
       - { label: "GitHub Repository", name: "github", widget: "string", hint: "Link to source code", required: false }
       - { label: "Live Demo URL", name: "demo", widget: "string", hint: "Link to live project", required: false }
