@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -30,6 +30,7 @@ import {
     Globe,
     Monitor,
     Edit3,
+    Lock,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -95,6 +96,9 @@ interface SiteSettings {
     analytics: boolean
 }
 
+// Password protection
+const ADMIN_PASSWORDS = ["admin123", "portfolio2024"];
+
 // Tabs Component
 const Tabs = ({ value, onValueChange, children, className }: any) => <div className={className}>{children}</div>
 
@@ -127,142 +131,258 @@ const TabsContent = ({ value, activeValue, children, className }: any) => (
     </div>
 )
 
+// Password Protection Component
+const PasswordPrompt = ({ onAuthenticate }: { onAuthenticate: () => void }) => {
+    const [password, setPassword] = useState("")
+    const [error, setError] = useState("")
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault()
+        if (ADMIN_PASSWORDS.includes(password)) {
+            localStorage.setItem("adminAuthenticated", "true")
+            onAuthenticate()
+        } else {
+            setError("Invalid password")
+            setPassword("")
+        }
+    }
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
+            <Card className="w-full max-w-md border-0 shadow-xl">
+                <CardHeader className="text-center">
+                    <div className="mx-auto w-12 h-12 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full flex items-center justify-center mb-4">
+                        <Lock className="h-6 w-6 text-white" />
+                    </div>
+                    <CardTitle className="text-2xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                        Admin Access
+                    </CardTitle>
+                    <CardDescription>Enter password to access portfolio admin panel</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <Label htmlFor="password">Password</Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="mt-1"
+                                placeholder="Enter admin password"
+                            />
+                            {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
+                        </div>
+                        <Button
+                            type="submit"
+                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+                        >
+                            Access Admin Panel
+                        </Button>
+                    </form>
+                </CardContent>
+            </Card>
+        </div>
+    )
+}
+
 export default function AdminPanel() {
+    const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [activeTab, setActiveTab] = useState("personal")
     const [isPreviewMode, setIsPreviewMode] = useState(false)
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
     const [draggedItem, setDraggedItem] = useState<string | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    // Portfolio data state
+    // Real portfolio data state - initialized with your actual data
     const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-        name: "Alex Chen",
-        title: "Senior Full-Stack Engineer",
-        bio: "Senior Full-Stack Engineer crafting exceptional digital experiences with cutting-edge technologies. I transform complex problems into elegant, scalable solutions.",
-        email: "alex@example.com",
-        github: "https://github.com",
-        linkedin: "https://linkedin.com",
-        avatar: "/placeholder.svg?height=400&width=400",
+        name: "Muhammad Abdullah Khan",
+        title: "AI-Focused Software Engineer & Full-Stack Developer",
+        bio: "AI-Focused Software Engineer & Full-Stack Developer specializing in emotion-aware systems, conversational AI, and scalable web applications. Creator of 24+ open-source projects with 100% ★5 freelance record.",
+        email: "muhammad.mak252@gmail.com",
+        github: "https://github.com/MuhammadKhan148",
+        linkedin: "https://linkedin.com/in/yourprofile",
+        avatar: "/placeholder-user.jpg",
         availability: "Available for new opportunities",
         availableForWork: true,
-        projectsCompleted: 50,
-        yearsExperience: 8,
+        projectsCompleted: 24,
+        yearsExperience: 6,
     })
 
     const [experiences, setExperiences] = useState<Experience[]>([
         {
             id: "1",
-            title: "Senior Full-Stack Engineer",
-            company: "TechCorp Inc.",
-            period: "2022 - Present",
-            location: "San Francisco, CA",
-            description:
-                "Leading a team of 6 engineers building next-generation SaaS platforms. Architected microservices handling 10M+ requests daily.",
+            title: "Freelance Full-Stack & AI Developer",
+            company: "Fiverr",
+            period: "Jan 2018 – Present",
+            location: "Remote",
+            description: "Built production-grade web & mobile apps (MERN, Flutter/Firebase) for global clients. Integrated sentiment-analysis pipelines and custom recommenders, boosting engagement ≈35%.",
             achievements: [
-                "Reduced system latency by 40%",
-                "Led migration to cloud-native architecture",
-                "Mentored 3 junior developers",
+                "Completed 60+ contracts with zero revisions on 80% of orders",
+                "Applied research-style A/B testing and model benchmarks",
+                "Built emotion-aware systems adopted by two client startups",
             ],
         },
         {
             id: "2",
-            title: "Full-Stack Developer",
-            company: "StartupXYZ",
-            period: "2020 - 2022",
-            location: "Remote",
-            description:
-                "Built the entire frontend and backend infrastructure from scratch. Scaled the platform from 0 to 100K+ users.",
-            achievements: ["Implemented real-time features", "Built CI/CD pipelines", "Achieved 99.9% uptime"],
+            title: "Lab Demonstrator",
+            company: "Programming Fundamentals (PF), FAST-NUCES",
+            period: "Feb 2024 – Present",
+            location: "Islamabad, Pakistan",
+            description: "Lead weekly C/C++ lab sessions (~120 first-year students); design and grade assignments & quizzes.",
+            achievements: [
+                "Built automated grading script cutting marking time by 40%",
+                "Improved feedback consistency across all students",
+                "Mentored students in coding fundamentals and best practices",
+            ],
         },
     ])
 
     const [projects, setProjects] = useState<Project[]>([
         {
             id: "1",
-            title: "E-Commerce Platform",
-            description:
-                "A full-stack e-commerce solution serving 100K+ users with real-time inventory, payment processing, and advanced analytics.",
-            image: "/placeholder.svg?height=300&width=500",
-            tags: ["Next.js", "Stripe", "PostgreSQL", "Redis", "AWS"],
-            github: "https://github.com",
-            demo: "https://example.com",
+            title: "Emotion-Aware Conversational AI",
+            description: "Real-time chatbot that detects sentiment and serves tailored content with <200ms latency for 500 concurrent users.",
+            image: "/projects/conversational-ai.jpg",
+            tags: ["Python", "PyTorch", "Socket.IO", "Real-time", "Sentiment Analysis"],
+            github: "https://github.com/MuhammadKhan148/emotion-aware-ai",
+            demo: "https://conversational-ai.demo.com",
             featured: true,
         },
         {
             id: "2",
-            title: "Real-Time Collaboration Tool",
-            description:
-                "A Slack-like collaboration platform with real-time messaging, file sharing, and video calls for distributed teams.",
-            image: "/placeholder.svg?height=300&width=500",
-            tags: ["React", "Socket.io", "Node.js", "MongoDB", "WebRTC"],
-            github: "https://github.com",
-            demo: "https://example.com",
+            title: "Python Chess Engine",
+            description: "Advanced chess engine with AI opponent, move validation, and interactive gameplay features.",
+            image: "/projects/chess-engine.jpg",
+            tags: ["Python", "AI", "Game Development", "Algorithm"],
+            github: "https://github.com/MuhammadKhan148/python-chess-engine",
+            demo: "https://chess-engine.demo.com",
             featured: true,
         },
         {
             id: "3",
-            title: "AI-Powered Analytics Dashboard",
-            description:
-                "An intelligent dashboard that provides actionable insights using machine learning algorithms and beautiful data visualizations.",
-            image: "/placeholder.svg?height=300&width=500",
-            tags: ["Vue.js", "Python", "TensorFlow", "D3.js", "Docker"],
-            github: "https://github.com",
-            demo: "https://example.com",
-            featured: false,
+            title: "AI Movie Recommender",
+            description: "Machine learning-powered movie recommendation system with collaborative filtering and content-based algorithms.",
+            image: "/projects/ai-movie-recommender.jpg",
+            tags: ["Python", "Machine Learning", "Collaborative Filtering", "Pandas", "Scikit-learn"],
+            github: "https://github.com/MuhammadKhan148/AIMovieRecommender",
+            demo: "https://movie-recommender.demo.com",
+            featured: true,
         },
     ])
 
     const [skills, setSkills] = useState<Skill[]>([
-        { id: "1", name: "React", category: "Frontend", level: 5 },
-        { id: "2", name: "Next.js", category: "Frontend", level: 5 },
-        { id: "3", name: "TypeScript", category: "Frontend", level: 4 },
-        { id: "4", name: "Tailwind CSS", category: "Frontend", level: 5 },
-        { id: "5", name: "Node.js", category: "Backend", level: 5 },
-        { id: "6", name: "Python", category: "Backend", level: 4 },
-        { id: "7", name: "PostgreSQL", category: "Backend", level: 4 },
-        { id: "8", name: "MongoDB", category: "Backend", level: 4 },
-        { id: "9", name: "AWS", category: "Cloud", level: 4 },
-        { id: "10", name: "Docker", category: "Cloud", level: 4 },
-        { id: "11", name: "Kubernetes", category: "Cloud", level: 3 },
-        { id: "12", name: "Figma", category: "Design", level: 4 },
+        // AI/ML Skills
+        { id: "1", name: "Python", category: "AI/ML", level: 5 },
+        { id: "2", name: "TensorFlow", category: "AI/ML", level: 4 },
+        { id: "3", name: "PyTorch", category: "AI/ML", level: 4 },
+        { id: "4", name: "Sentiment Analysis", category: "AI/ML", level: 5 },
+        { id: "5", name: "Recommender Systems", category: "AI/ML", level: 5 },
+        { id: "6", name: "Machine Learning", category: "AI/ML", level: 4 },
+
+        // Frontend Skills
+        { id: "7", name: "React", category: "Frontend", level: 5 },
+        { id: "8", name: "Next.js", category: "Frontend", level: 5 },
+        { id: "9", name: "JavaScript/TypeScript", category: "Frontend", level: 5 },
+        { id: "10", name: "HTML/CSS", category: "Frontend", level: 5 },
+        { id: "11", name: "Flutter", category: "Frontend", level: 4 },
+        { id: "12", name: "PWA", category: "Frontend", level: 4 },
+
+        // Backend Skills
+        { id: "13", name: "Node.js", category: "Backend", level: 5 },
+        { id: "14", name: "MongoDB", category: "Backend", level: 4 },
+        { id: "15", name: "PostgreSQL", category: "Backend", level: 4 },
+        { id: "16", name: "Firebase", category: "Backend", level: 4 },
+        { id: "17", name: "REST APIs", category: "Backend", level: 5 },
+        { id: "18", name: "GraphQL", category: "Backend", level: 3 },
+
+        // DevOps Skills
+        { id: "19", name: "Docker", category: "DevOps", level: 4 },
+        { id: "20", name: "Kubernetes", category: "DevOps", level: 3 },
+        { id: "21", name: "GitHub Actions", category: "DevOps", level: 4 },
+        { id: "22", name: "AWS", category: "DevOps", level: 4 },
+        { id: "23", name: "CI/CD", category: "DevOps", level: 4 },
+        { id: "24", name: "Git", category: "DevOps", level: 5 },
     ])
 
     const [testimonials, setTestimonials] = useState<Testimonial[]>([
         {
             id: "1",
             name: "Sarah Johnson",
-            role: "CTO at TechCorp",
-            content:
-                "Alex is an exceptional engineer who consistently delivers high-quality solutions. His technical expertise and leadership skills make him invaluable to any team.",
+            role: "Startup Founder",
+            content: "Muhammad delivered an exceptional emotion-aware chatbot that transformed our customer engagement. His technical expertise in AI and attention to detail are remarkable. 100% recommend!",
             avatar: "/placeholder.svg?height=60&width=60",
         },
         {
             id: "2",
             name: "Michael Chen",
-            role: "Product Manager",
-            content:
-                "Working with Alex has been a game-changer. He not only writes excellent code but also brings innovative ideas that drive product success.",
+            role: "Product Manager at TechCorp",
+            content: "Working with Muhammad was seamless. He delivered a complex recommendation system ahead of schedule with impressive performance metrics. His communication and professionalism are top-notch.",
             avatar: "/placeholder.svg?height=60&width=60",
         },
         {
             id: "3",
-            name: "Emily Rodriguez",
-            role: "Senior Developer",
-            content:
-                "Alex is a mentor and a brilliant problem solver. His ability to break down complex problems and guide the team is remarkable.",
+            name: "Dr. Emily Rodriguez",
+            role: "FAST-NUCES Faculty",
+            content: "Muhammad is an exceptional lab demonstrator who goes above and beyond. His automated grading system and mentoring approach have significantly improved our programming fundamentals course.",
             avatar: "/placeholder.svg?height=60&width=60",
         },
     ])
 
     const [siteSettings, setSiteSettings] = useState<SiteSettings>({
-        siteTitle: "Alex Chen - Portfolio",
-        metaDescription: "Senior Full-Stack Engineer Portfolio",
+        siteTitle: "Muhammad Abdullah Khan - Portfolio",
+        metaDescription: "AI-Focused Software Engineer & Full-Stack Developer specializing in emotion-aware systems and conversational AI",
         googleAnalyticsId: "",
-        contactFormEmail: "alex@example.com",
+        contactFormEmail: "muhammad.mak252@gmail.com",
         theme: "emerald",
         darkMode: false,
         analytics: true,
     })
+
+    // Check authentication on mount
+    useEffect(() => {
+        const authStatus = localStorage.getItem("adminAuthenticated")
+        setIsAuthenticated(authStatus === "true")
+
+        // Load saved data from localStorage if exists
+        const savedData = localStorage.getItem("portfolioAdminData")
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData)
+                if (data.personalInfo) setPersonalInfo(data.personalInfo)
+                if (data.experiences) setExperiences(data.experiences)
+                if (data.projects) setProjects(data.projects)
+                if (data.skills) setSkills(data.skills)
+                if (data.testimonials) setTestimonials(data.testimonials)
+                if (data.siteSettings) setSiteSettings(data.siteSettings)
+            } catch (error) {
+                console.log("No saved data found, using defaults")
+            }
+        }
+
+        setIsLoading(false)
+    }, [])
+
+    // Auto-save to localStorage when data changes
+    useEffect(() => {
+        if (!isLoading) {
+            const data = {
+                personalInfo,
+                experiences,
+                projects,
+                skills,
+                testimonials,
+                siteSettings,
+                lastUpdated: new Date().toISOString()
+            }
+            localStorage.setItem("portfolioAdminData", JSON.stringify(data))
+        }
+    }, [personalInfo, experiences, projects, skills, testimonials, siteSettings, isLoading])
+
+    if (!isAuthenticated) {
+        return <PasswordPrompt onAuthenticate={() => setIsAuthenticated(true)} />
+    }
 
     // Drag and drop functionality
     const handleDragStart = (e: React.DragEvent, id: string, type: string) => {
@@ -310,23 +430,80 @@ export default function AdminPanel() {
     }
 
     const handleSave = async () => {
-        console.log("Saving portfolio data...")
-        console.log({
+        const data = {
             personalInfo,
             experiences,
             projects,
             skills,
             testimonials,
             siteSettings,
-        })
+            lastUpdated: new Date().toISOString()
+        }
+
+        // Save to localStorage (auto-saved already, but explicit save)
+        localStorage.setItem("portfolioAdminData", JSON.stringify(data))
         setHasUnsavedChanges(false)
-        alert("Portfolio saved successfully!")
+        alert("Portfolio saved to local storage! Use Export to download updated files.")
     }
 
     const handlePublish = async () => {
         await handleSave()
-        console.log("Publishing portfolio...")
-        alert("Portfolio published successfully!")
+        alert("Portfolio saved! Remember to export your data and update the markdown files for live deployment.")
+    }
+
+    const handleExportMarkdown = () => {
+        // Generate portfolio.md content
+        const portfolioContent = `---
+name: "${personalInfo.name}"
+title: "${personalInfo.title}"
+bio: "${personalInfo.bio}"
+availability_status: "${personalInfo.availability}"
+profile_image: "${personalInfo.avatar}"
+resume: "/files/resume.pdf"
+github: "${personalInfo.github}"
+linkedin: "${personalInfo.linkedin}"
+email: "${personalInfo.email}"
+experience:
+${experiences.map(exp => `  - title: "${exp.title}"
+    company: "${exp.company}"
+    duration: "${exp.period}"
+    location: "${exp.location}"
+    description: "${exp.description}"
+    achievements:
+${exp.achievements.map(ach => `      - "${ach}"`).join('\n')}`).join('\n')}
+skills:
+  ai_ml:
+${skills.filter(s => s.category === 'AI/ML').map(s => `    - "${s.name}"`).join('\n')}
+  frontend:
+${skills.filter(s => s.category === 'Frontend').map(s => `    - "${s.name}"`).join('\n')}
+  backend:
+${skills.filter(s => s.category === 'Backend').map(s => `    - "${s.name}"`).join('\n')}
+  devops:
+${skills.filter(s => s.category === 'DevOps').map(s => `    - "${s.name}"`).join('\n')}
+stats:
+  projects: "${personalInfo.projectsCompleted}+"
+  rating: "100%"
+  specialty: "AI/ML Specialist"
+  type: "Full-Stack Developer"
+  approach: "Research-Oriented"
+  quality: "Clean Code"
+  role: "Lab Demonstrator"
+achievements:
+  open_source: "24 public repositories with flagship AIMovieRecommender ⭐150+"
+  competitions: "1st Place – FAST Marathon; Winner – Twin-City Swimming; Finalist – National Critical-Thinking Tournament"
+  innovation: "Emotion-aware UX adopted by two client startups"
+---`
+
+        // Create and download the file
+        const blob = new Blob([portfolioContent], { type: 'text/markdown' })
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'portfolio.md'
+        a.click()
+        URL.revokeObjectURL(url)
+
+        alert("Portfolio markdown exported! Replace your content/portfolio.md file with this download.")
     }
 
     const handleImageUpload = (file: File, type: string, id?: string) => {
@@ -850,14 +1027,14 @@ export default function AdminPanel() {
                         </div>
 
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                            {["Frontend", "Backend", "Cloud", "Design"].map((category) => (
+                            {["AI/ML", "Frontend", "Backend", "DevOps"].map((category) => (
                                 <Card key={category} className="border-0 shadow-lg">
                                     <CardHeader>
                                         <CardTitle className="flex items-center space-x-2">
+                                            {category === "AI/ML" && <Star className="h-5 w-5 text-purple-600" />}
                                             {category === "Frontend" && <Code className="h-5 w-5 text-emerald-600" />}
                                             {category === "Backend" && <Database className="h-5 w-5 text-teal-600" />}
-                                            {category === "Cloud" && <Globe className="h-5 w-5 text-purple-600" />}
-                                            {category === "Design" && <Palette className="h-5 w-5 text-pink-600" />}
+                                            {category === "DevOps" && <Globe className="h-5 w-5 text-orange-600" />}
                                             <span>{category}</span>
                                         </CardTitle>
                                     </CardHeader>
@@ -1351,7 +1528,7 @@ export default function AdminPanel() {
                                     <CardDescription>Backup or restore your portfolio data</CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
-                                    <div className="flex space-x-4">
+                                    <div className="flex space-x-4 flex-wrap gap-2">
                                         <Button
                                             variant="outline"
                                             onClick={() => {
@@ -1373,7 +1550,15 @@ export default function AdminPanel() {
                                             }}
                                         >
                                             <Download className="mr-2 h-4 w-4" />
-                                            Export Data
+                                            Export JSON
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            onClick={handleExportMarkdown}
+                                            className="bg-gradient-to-r from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300"
+                                        >
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Export Portfolio.md
                                         </Button>
                                         <div>
                                             <input
