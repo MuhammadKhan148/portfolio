@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Portfolio Admin Invitation</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #2d3748;">You're invited to manage Muhammad's Portfolio</h2>
+
+        <p>Hello,</p>
+
+        <p>You've been invited to access the admin panel for Muhammad Abdullah Khan's portfolio website.</p>
+
+        <div style="background-color: #f7fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #2d3748;">Direct Admin Access:</h3>
+            <p><strong>Admin Panel:</strong> <a href="https://soft-kleicha-9c1587.netlify.app/admin"
+                    style="color: #3182ce;">https://soft-kleicha-9c1587.netlify.app/admin</a></p>
+            <p><strong>Your Email:</strong> {{ .Email }}</p>
+        </div>
+
+        <div style="background-color: #e6fffa; padding: 15px; border-radius: 8px; margin: 20px 0;">
+            <h4 style="margin-top: 0; color: #065f46;">Quick Setup Instructions:</h4>
+            <ol>
+                <li>Click the admin panel link above</li>
+                <li>Enter your email address: <strong>{{ .Email }}</strong></li>
+                <li>Set your password when prompted</li>
+                <li>Start editing the portfolio content!</li>
+            </ol>
+        </div>
+
+        <p><strong>What you can manage:</strong></p>
+        <ul>
+            <li>Portfolio information (name, bio, social links)</li>
+            <li>Projects (add, edit, delete)</li>
+            <li>Upload images and files</li>
+            <li>Update resume and profile picture</li>
+        </ul>
+
+        <p>If you have any issues accessing the admin panel, please contact Muhammad directly.</p>
+
+        <hr style="margin: 30px 0; border: none; border-top: 1px solid #e2e8f0;">
+
+        <p style="font-size: 14px; color: #718096;">
+            This invitation was sent from Muhammad Abdullah Khan's Portfolio Admin System<br>
+            <a href="https://soft-kleicha-9c1587.netlify.app">https://soft-kleicha-9c1587.netlify.app</a>
+        </p>
+    </div>
+</body>
+
+</html>
