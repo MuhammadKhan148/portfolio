@@ -251,7 +251,7 @@ export default function Portfolio() {
                 className="border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50 transition-all duration-300"
                 asChild
               >
-                <Link href="#contact">
+                <Link href="/files/Muhammad_Abdullah_Khan_Resume.pdf" target="_blank">
                   <Download className="mr-2 h-5 w-5" />
                   Download Resume
                 </Link>
@@ -335,7 +335,7 @@ export default function Portfolio() {
                 <div className="absolute -inset-4 bg-gradient-to-r from-emerald-600 to-purple-600 rounded-2xl blur-2xl opacity-25 group-hover:opacity-40 transition-opacity duration-300" />
                 <div className="relative">
                   <Image
-                    src="/profile-image.jpg"
+                    src="/images/muhammad-profile.jpg"
                     alt="Muhammad Abdullah Khan - AI-Focused Software Engineer"
                     width={400}
                     height={400}
@@ -746,7 +746,7 @@ export default function Portfolio() {
                 className="border-2 border-emerald-200 hover:border-emerald-300 hover:bg-emerald-50"
                 asChild
               >
-                <Link href="#" download>
+                <Link href="/files/Muhammad_Abdullah_Khan_Resume.pdf" target="_blank">
                   <Download className="mr-2 h-5 w-5" />
                   Download Resume
                 </Link>
