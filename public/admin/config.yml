@@ -1,6 +1,9 @@
 backend:
   name: git-gateway
   branch: master
+  
+# Simplify authentication process
+publish_mode: editorial_workflow
 
 media_folder: "public/uploads"
 public_folder: "/uploads"

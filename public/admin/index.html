@@ -20,6 +20,27 @@
                     });
                 }
             });
+
+            // Handle confirmation and recovery tokens
+            window.netlifyIdentity.on("confirm", user => {
+                console.log("User confirmed:", user);
+                document.location.href = "/admin/";
+            });
+
+            window.netlifyIdentity.on("recover", user => {
+                console.log("User recovered:", user);
+                document.location.href = "/admin/";
+            });
+
+            // Auto-handle tokens in URL
+            const url = new URL(window.location.href);
+            if (url.hash.includes('confirmation_token') || url.hash.includes('recovery_token')) {
+                setTimeout(() => {
+                    if (window.netlifyIdentity.currentUser()) {
+                        document.location.href = "/admin/";
+                    }
+                }, 3000);
+            }
         }
     </script>
 </body>
