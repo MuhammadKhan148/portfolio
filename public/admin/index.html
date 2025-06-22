@@ -13,50 +13,13 @@
     <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
     <script>
         if (window.netlifyIdentity) {
-            // Initialize and handle all authentication states
             window.netlifyIdentity.on("init", user => {
-                console.log("Identity init:", user);
                 if (!user) {
-                    // Show login for new users
                     window.netlifyIdentity.on("login", () => {
-                        console.log("User logged in, redirecting to admin");
-                        window.location.href = "/admin/";
+                        document.location.href = "/admin/";
                     });
                 }
             });
-
-            // Handle all token-based authentications automatically
-            window.netlifyIdentity.on("confirm", user => {
-                console.log("User confirmed:", user);
-                window.location.href = "/admin/";
-            });
-
-            window.netlifyIdentity.on("recover", user => {
-                console.log("User recovered:", user);
-                window.location.href = "/admin/";
-            });
-
-            // Skip confirmation for invited users - direct access
-            window.netlifyIdentity.on("invite", user => {
-                console.log("User invited:", user);
-                window.location.href = "/admin/";
-            });
-
-            // Handle any tokens in URL immediately
-            const currentUrl = window.location.href;
-            if (currentUrl.includes('confirmation_token') ||
-                currentUrl.includes('recovery_token') ||
-                currentUrl.includes('invite_token')) {
-
-                console.log("Token detected, processing...");
-
-                // Clear the URL and redirect to clean admin
-                setTimeout(() => {
-                    const cleanUrl = currentUrl.split('#')[0] + '#/';
-                    window.history.replaceState({}, document.title, "/admin/");
-                    window.location.reload();
-                }, 2000);
-            }
         }
     </script>
 </body>
