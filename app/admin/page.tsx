@@ -96,9 +96,6 @@ interface SiteSettings {
     analytics: boolean
 }
 
-// Password protection
-const ADMIN_PASSWORDS = ["admin123", "portfolio2024"];
-
 // Tabs Component
 const Tabs = ({ value, onValueChange, children, className }: any) => <div className={className}>{children}</div>
 
@@ -131,63 +128,7 @@ const TabsContent = ({ value, activeValue, children, className }: any) => (
     </div>
 )
 
-// Password Protection Component
-const PasswordPrompt = ({ onAuthenticate }: { onAuthenticate: () => void }) => {
-    const [password, setPassword] = useState("")
-    const [error, setError] = useState("")
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        if (ADMIN_PASSWORDS.includes(password)) {
-            localStorage.setItem("adminAuthenticated", "true")
-            onAuthenticate()
-        } else {
-            setError("Invalid password")
-            setPassword("")
-        }
-    }
-
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 flex items-center justify-center">
-            <Card className="w-full max-w-md border-0 shadow-xl">
-                <CardHeader className="text-center">
-                    <div className="mx-auto w-12 h-12 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-full flex items-center justify-center mb-4">
-                        <Lock className="h-6 w-6 text-white" />
-                    </div>
-                    <CardTitle className="text-2xl bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                        Admin Access
-                    </CardTitle>
-                    <CardDescription>Enter password to access portfolio admin panel</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="mt-1"
-                                placeholder="Enter admin password"
-                            />
-                            {error && <p className="text-red-600 text-sm mt-1">{error}</p>}
-                        </div>
-                        <Button
-                            type="submit"
-                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
-                        >
-                            Access Admin Panel
-                        </Button>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
-    )
-}
-
 export default function AdminPanel() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [activeTab, setActiveTab] = useState("personal")
     const [isPreviewMode, setIsPreviewMode] = useState(false)
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
@@ -589,11 +530,8 @@ export default function AdminPanel() {
         analytics: true,
     })
 
-    // Check authentication on mount
+    // Load saved data from localStorage on mount
     useEffect(() => {
-        const authStatus = localStorage.getItem("adminAuthenticated")
-        setIsAuthenticated(authStatus === "true")
-
         // Load saved data from localStorage if exists
         const savedData = localStorage.getItem("portfolioAdminData")
         if (savedData) {
@@ -629,9 +567,7 @@ export default function AdminPanel() {
         }
     }, [personalInfo, experiences, projects, skills, testimonials, siteSettings, isLoading])
 
-    if (!isAuthenticated) {
-        return <PasswordPrompt onAuthenticate={() => setIsAuthenticated(true)} />
-    }
+
 
     // Drag and drop functionality
     const handleDragStart = (e: React.DragEvent, id: string, type: string) => {
@@ -853,7 +789,7 @@ ${project.tags.map(tag => `- **${tag}**: Core technology component`).join('\n')}
             setHasUnsavedChanges(false)
 
             alert("✅ Portfolio saved successfully to GitHub! Netlify will auto-deploy in 2-3 minutes.")
-        } catch (error) {
+        } catch (error: any) {
             console.error('Save error:', error)
             if (error.message?.includes('Bad credentials')) {
                 localStorage.removeItem('githubToken')
