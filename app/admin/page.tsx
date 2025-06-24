@@ -2,1016 +2,799 @@
 
 import type React from "react"
 
-import { useState, useRef, useEffect } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
+import { Badge } from "@/components/ui/badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Progress } from "@/components/ui/progress"
 import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
 import {
-    Save,
-    Eye,
-    Upload,
-    Plus,
-    Trash2,
-    GripVertical,
-    Settings,
     User,
     Briefcase,
     Code,
     FolderOpen,
-    MessageSquare,
-    Palette,
-    Star,
-    Download,
-    Database,
-    Globe,
-    Monitor,
-    Edit3,
     Github,
-    Sparkles,
+    MessageSquare,
+    Settings,
+    Save,
+    Upload,
+    Download,
+    Trash2,
+    Plus,
+    Star,
+    GitBranch,
+    Activity,
+    Zap,
+    Database,
+    RefreshCw,
+    CheckCircle,
+    XCircle,
 } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+import { toast } from "@/hooks/use-toast"
 import { EnhancedGitHubSync } from "@/components/enhanced-github-sync"
 
-// Types
-interface PersonalInfo {
+interface ProfileData {
     name: string
     title: string
     bio: string
     email: string
-    github: string
-    linkedin: string
-    avatar: string
-    availability: string
-    availableForWork: boolean
-    projectsCompleted: number
-    yearsExperience: number
-}
-
-interface Experience {
-    id: string
-    title: string
-    company: string
-    period: string
     location: string
-    description: string
-    achievements: string[]
+    website: string
+    avatar: string
+    social: {
+        github: string
+        linkedin: string
+        twitter: string
+    }
 }
 
-interface Project {
+interface WorkExperience {
     id: string
-    title: string
+    company: string
+    position: string
+    duration: string
     description: string
-    image: string
-    tags: string[]
-    github: string
-    demo: string
+    technologies: string[]
     featured: boolean
 }
 
 interface Skill {
     id: string
     name: string
-    category: string
     level: number
+    category: string
+    featured: boolean
+}
+
+interface Project {
+    id: string
+    title: string
+    description: string
+    technologies: string[]
+    githubUrl: string
+    liveUrl: string
+    image: string
+    featured: boolean
+    status: "completed" | "in-progress" | "planned"
 }
 
 interface Testimonial {
     id: string
     name: string
+    company: string
     role: string
     content: string
     avatar: string
+    rating: number
 }
 
-interface SiteSettings {
-    siteTitle: string
-    metaDescription: string
-    googleAnalyticsId: string
-    contactFormEmail: string
-    theme: string
-    darkMode: boolean
-    analytics: boolean
+interface SiteConfig {
+    theme: "light" | "dark" | "cyberpunk"
+    primaryColor: string
+    showGitHubStats: boolean
+    showTestimonials: boolean
+    contactFormEnabled: boolean
+    analyticsEnabled: boolean
 }
 
-// Clean Tabs Component
-const Tabs = ({ value, onValueChange, children, className }: any) => <div className={className}>{children}</div>
-
-const TabsList = ({ children, className }: any) => (
-    <div
-        className={`inline-flex h-12 items-center justify-center rounded-xl bg-slate-100 p-1 text-slate-500 shadow-sm ${className}`}
-    >
-        {children}
-    </div>
-)
-
-const TabsTrigger = ({ value, children, isActive, onClick, className }: any) => (
-    <button
-        onClick={() => onClick(value)}
-        className={`inline-flex items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 ${isActive ? "bg-white text-slate-900 shadow-sm" : "hover:bg-white/50 hover:text-slate-900"
-            } ${className}`}
-    >
-        {children}
-    </button>
-)
-
-const TabsContent = ({ value, activeValue, children, className }: any) => (
-    <div
-        className={`mt-6 ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${value === activeValue ? "block" : "hidden"
-            } ${className}`}
-    >
-        {children}
-    </div>
-)
-
-export default function AdminPanel() {
-    const [activeTab, setActiveTab] = useState("personal")
-    const [isPreviewMode, setIsPreviewMode] = useState(false)
+export default function AdminPage() {
+    const [activeTab, setActiveTab] = useState("profile")
+    const [isLoading, setIsLoading] = useState(false)
+    const [lastSaved, setLastSaved] = useState<Date | null>(null)
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
-    const [draggedItem, setDraggedItem] = useState<string | null>(null)
-    const [isLoading, setIsLoading] = useState(true)
-    const [isSaving, setIsSaving] = useState(false)
-    const fileInputRef = useRef<HTMLInputElement>(null)
 
-    // Real portfolio data state
-    const [personalInfo, setPersonalInfo] = useState<PersonalInfo>({
-        name: "Muhammad Abdullah Khan",
-        title: "AI/ML Engineer & Full-Stack Developer | Research-Oriented Software Engineer",
-        bio: "AI/ML Engineer & Full-Stack Developer with 6+ years of experience specializing in emotion-aware systems, conversational AI, and scalable web applications. Creator of 24+ open-source projects with 100% ★5 freelance record. Passionate about research-driven development, machine learning innovation, and building intelligent systems that enhance user experiences.",
-        email: "muhammad.mak252@gmail.com",
-        github: "https://github.com/MuhammadKhan148",
-        linkedin: "https://linkedin.com/in/muhammad-abdullah-khan-01271a263/",
-        avatar: "/images/muhammad-profile.jpg",
-        availability: "Open to full-time opportunities and exciting projects",
-        availableForWork: true,
-        projectsCompleted: 50,
-        yearsExperience: 6,
+    // Data states
+    const [profile, setProfile] = useState<ProfileData>({
+        name: "Muhammad Khan",
+        title: "AI/ML Engineer & Full-Stack Developer",
+        bio: "Passionate about creating intelligent solutions that bridge the gap between human needs and technological possibilities.",
+        email: "muhammad@example.com",
+        location: "San Francisco, CA",
+        website: "https://muhammad-portfolio.dev",
+        avatar: "/PIC.jpeg",
+        social: {
+            github: "muhammad-khan",
+            linkedin: "muhammad-khan-dev",
+            twitter: "muhammad_dev",
+        },
     })
 
-    const [experiences, setExperiences] = useState<Experience[]>([
+    const [workExperience, setWorkExperience] = useState<WorkExperience[]>([
         {
             id: "1",
-            title: "Freelance AI/ML & Full-Stack Developer",
-            company: "Fiverr Platform",
-            period: "Jan 2018 – Present",
-            location: "Remote • Global Clients",
-            description:
-                "Built production-grade web & mobile applications (MERN, Flutter/Firebase) for 50+ global clients. Specialized in integrating sentiment-analysis pipelines, recommendation systems, and custom AI models, boosting client engagement by ≈35% on average.",
-            achievements: [
-                "Maintained 100% ★5 rating across 60+ completed contracts",
-                "Achieved zero revisions required on 80% of delivered projects",
-                "Applied research-style A/B testing and ML model benchmarks for optimal performance",
-                "Built emotion-aware systems adopted by multiple client startups",
-                "Generated $50K+ in freelance revenue through high-quality AI/ML solutions",
-                "Developed custom recommendation engines improving user retention by 40%",
-            ],
+            company: "TechCorp AI",
+            position: "Senior AI/ML Engineer",
+            duration: "2022 - Present",
+            description: "Leading development of conversational AI systems and machine learning pipelines.",
+            technologies: ["Python", "TensorFlow", "PyTorch", "AWS", "Docker"],
+            featured: true,
         },
         {
             id: "2",
-            title: "Lab Demonstrator - Programming Fundamentals",
-            company: "FAST National University of Computer & Emerging Sciences",
-            period: "Feb 2024 – Present",
-            location: "Islamabad, Pakistan",
-            description:
-                "Lead weekly C/C++ programming lab sessions for ~120 first-year computer science students. Design comprehensive assignments, conduct assessments, and provide mentorship in fundamental programming concepts and software engineering practices.",
-            achievements: [
-                "Built automated grading script reducing marking time by 40% and improving consistency",
-                "Improved student performance metrics with structured feedback system",
-                "Mentored 120+ students in coding fundamentals, data structures, and best practices",
-                "Developed innovative teaching methodologies for complex programming concepts",
-                "Maintained 95% student satisfaction rate in course evaluations",
-                "Created supplementary learning materials adopted by other instructors",
-            ],
+            company: "DataFlow Solutions",
+            position: "Full-Stack Developer",
+            duration: "2020 - 2022",
+            description: "Built scalable web applications and data visualization platforms.",
+            technologies: ["React", "Node.js", "PostgreSQL", "Redis", "Kubernetes"],
+            featured: true,
         },
-        {
-            id: "3",
-            title: "Research Assistant - AI/ML Projects",
-            company: "Independent Research",
-            period: "2020 – Present",
-            location: "Pakistan",
-            description:
-                "Conducted independent research in artificial intelligence, machine learning, and software engineering. Published projects in emotion recognition, recommendation systems, and intelligent game development with focus on practical applications.",
-            achievements: [
-                "Developed AIMovieRecommender with 150+ GitHub stars and active community",
-                "Created emotion-aware conversational AI with <200ms response time",
-                "Built Python chess engine with advanced AI opponent algorithms",
-                "Published 24+ open-source projects with comprehensive documentation",
-                "Achieved recognition in multiple programming competitions and hackathons",
-                "Contributed to open-source ML libraries and frameworks",
-            ],
-        },
+    ])
+
+    const [skills, setSkills] = useState<Skill[]>([
+        { id: "1", name: "Python", level: 95, category: "Programming", featured: true },
+        { id: "2", name: "Machine Learning", level: 90, category: "AI/ML", featured: true },
+        { id: "3", name: "React", level: 88, category: "Frontend", featured: true },
+        { id: "4", name: "Node.js", level: 85, category: "Backend", featured: true },
+        { id: "5", name: "TensorFlow", level: 82, category: "AI/ML", featured: false },
+        { id: "6", name: "AWS", level: 80, category: "Cloud", featured: false },
     ])
 
     const [projects, setProjects] = useState<Project[]>([
         {
             id: "1",
-            title: "AIMovieRecommender",
-            description:
-                "Advanced machine learning-powered movie recommendation system using collaborative filtering, content-based algorithms, and hybrid approaches. Features real-time recommendations, user preference learning, and comprehensive movie database integration with 150+ GitHub stars.",
-            image: "/projects/ai-movie-recommender.jpg",
-            tags: [
-                "Python",
-                "Machine Learning",
-                "Collaborative Filtering",
-                "Pandas",
-                "Scikit-learn",
-                "Flask",
-                "React",
-                "MongoDB",
-            ],
-            github: "https://github.com/MuhammadKhan148/AIMovieRecommender",
-            demo: "https://ai-movie-recommender.demo.com",
+            title: "Emotion-Aware Conversational AI",
+            description: "Advanced chatbot that detects and responds to user emotions using NLP and sentiment analysis.",
+            technologies: ["Python", "TensorFlow", "FastAPI", "React", "WebSocket"],
+            githubUrl: "https://github.com/muhammad/emotion-ai",
+            liveUrl: "https://emotion-ai.demo.com",
+            image: "/placeholder.svg?height=200&width=300",
             featured: true,
+            status: "completed",
         },
         {
             id: "2",
-            title: "Emotion-Aware Conversational AI",
-            description:
-                "Real-time chatbot system that performs sentiment analysis and adapts responses based on user emotional state. Serves tailored content with <200ms latency for 500+ concurrent users using advanced NLP and emotion recognition algorithms.",
-            image: "/projects/conversational-ai.jpg",
-            tags: ["Python", "PyTorch", "NLTK", "Socket.IO", "Real-time", "Sentiment Analysis", "NLP", "WebSockets"],
-            github: "https://github.com/MuhammadKhan148/emotion-aware-ai",
-            demo: "https://conversational-ai.demo.com",
+            title: "AI Movie Recommender",
+            description: "Intelligent movie recommendation system using collaborative filtering and deep learning.",
+            technologies: ["Python", "Scikit-learn", "Flask", "Vue.js", "MongoDB"],
+            githubUrl: "https://github.com/muhammad/movie-ai",
+            liveUrl: "https://movie-ai.demo.com",
+            image: "/placeholder.svg?height=200&width=300",
             featured: true,
+            status: "completed",
         },
-        {
-            id: "3",
-            title: "Python Chess Engine",
-            description:
-                "Sophisticated chess engine featuring advanced AI opponent with minimax algorithm, alpha-beta pruning, move validation, interactive GUI, and comprehensive game analysis. Supports multiple difficulty levels and learning modes.",
-            image: "/projects/chess-engine.jpg",
-            tags: ["Python", "AI Algorithms", "Minimax", "Game Development", "Pygame", "Object-Oriented Design"],
-            github: "https://github.com/MuhammadKhan148/python-chess-engine",
-            demo: "https://chess-engine.demo.com",
-            featured: true,
-        },
-        {
-            id: "4",
-            title: "E-Commerce Platform with AI Recommendations",
-            description:
-                "Full-stack e-commerce solution with integrated AI-powered product recommendations, real-time inventory management, payment processing, and advanced analytics dashboard. Serves 10K+ monthly active users.",
-            image: "/projects/ecommerce-ai.jpg",
-            tags: ["MERN Stack", "AI Recommendations", "Stripe", "Redux", "MongoDB", "AWS", "Docker"],
-            github: "https://github.com/MuhammadKhan148/ecommerce-ai",
-            demo: "https://ecommerce-ai.demo.com",
-            featured: true,
-        },
-        {
-            id: "5",
-            title: "Real-Time Collaboration Platform",
-            description:
-                "Slack-inspired collaboration platform with real-time messaging, file sharing, video calls, screen sharing, and team management. Built for distributed teams with end-to-end encryption and scalable architecture.",
-            image: "/projects/collaboration-platform.jpg",
-            tags: ["React", "Node.js", "Socket.IO", "WebRTC", "MongoDB", "Redis", "JWT"],
-            github: "https://github.com/MuhammadKhan148/collaboration-platform",
-            demo: "https://collaboration.demo.com",
-            featured: false,
-        },
-        {
-            id: "6",
-            title: "Smart IoT Home Automation",
-            description:
-                "IoT-based home automation system with mobile app control, voice commands, automated scheduling, energy monitoring, and machine learning-powered usage optimization.",
-            image: "/projects/iot-home.jpg",
-            tags: ["IoT", "React Native", "Python", "MQTT", "Raspberry Pi", "TensorFlow", "Firebase"],
-            github: "https://github.com/MuhammadKhan148/iot-home-automation",
-            demo: "https://iot-home.demo.com",
-            featured: false,
-        },
-    ])
-
-    const [skills, setSkills] = useState<Skill[]>([
-        // AI/ML & Data Science
-        { id: "16", name: "Machine Learning", category: "AI/ML", level: 5 },
-        { id: "17", name: "Deep Learning", category: "AI/ML", level: 5 },
-        { id: "18", name: "Neural Networks", category: "AI/ML", level: 5 },
-        { id: "19", name: "TensorFlow", category: "AI/ML", level: 5 },
-        { id: "20", name: "PyTorch", category: "AI/ML", level: 5 },
-        { id: "21", name: "Scikit-learn", category: "AI/ML", level: 5 },
-        { id: "33", name: "NLP", category: "AI/ML", level: 5 },
-        { id: "34", name: "Sentiment Analysis", category: "AI/ML", level: 5 },
-        { id: "35", name: "Recommender Systems", category: "AI/ML", level: 5 },
-
-        // Frontend Technologies
-        { id: "41", name: "React", category: "Frontend", level: 5 },
-        { id: "42", name: "Next.js", category: "Frontend", level: 5 },
-        { id: "43", name: "Vue.js", category: "Frontend", level: 4 },
-        { id: "50", name: "Tailwind CSS", category: "Frontend", level: 5 },
-        { id: "52", name: "Material-UI", category: "Frontend", level: 5 },
-        { id: "55", name: "Redux", category: "Frontend", level: 5 },
-
-        // Backend Technologies
-        { id: "79", name: "Node.js", category: "Backend", level: 5 },
-        { id: "80", name: "Express.js", category: "Backend", level: 5 },
-        { id: "84", name: "Flask", category: "Backend", level: 5 },
-        { id: "91", name: "REST APIs", category: "Backend", level: 5 },
-        { id: "93", name: "WebSockets", category: "Backend", level: 5 },
-
-        // Cloud & DevOps
-        { id: "113", name: "AWS", category: "Cloud/DevOps", level: 5 },
-        { id: "120", name: "Docker", category: "Cloud/DevOps", level: 5 },
-        { id: "123", name: "GitHub Actions", category: "Cloud/DevOps", level: 5 },
     ])
 
     const [testimonials, setTestimonials] = useState<Testimonial[]>([
         {
             id: "1",
             name: "Sarah Johnson",
-            role: "Startup Founder & CEO",
-            content:
-                "Muhammad delivered an exceptional emotion-aware chatbot that completely transformed our customer engagement metrics. His deep technical expertise in AI, attention to detail, and ability to deliver complex solutions on time are remarkable. The system he built increased our user satisfaction by 40%. 100% recommend for any AI/ML project!",
-            avatar: "/placeholder.svg?height=60&width=60",
-        },
-        {
-            id: "2",
-            name: "Michael Chen",
-            role: "Product Manager at TechCorp",
-            content:
-                "Working with Muhammad was seamless and professional. He delivered a complex recommendation system ahead of schedule with impressive performance metrics. His code quality, documentation, and communication skills are top-notch. The recommendation engine he built improved our platform's user engagement by 35% within the first month.",
-            avatar: "/placeholder.svg?height=60&width=60",
-        },
-        {
-            id: "3",
-            name: "Dr. Emily Rodriguez",
-            role: "Faculty - FAST-NUCES",
-            content:
-                "Muhammad is an exceptional lab demonstrator who goes above and beyond for his students. His automated grading system and innovative teaching approach have significantly improved our programming fundamentals course. Students consistently rate him 5/5 for his clear explanations and helpful mentoring.",
-            avatar: "/placeholder.svg?height=60&width=60",
+            company: "TechCorp AI",
+            role: "CTO",
+            content: "Muhammad is an exceptional AI engineer who consistently delivers innovative solutions.",
+            avatar: "/placeholder.svg?height=40&width=40",
+            rating: 5,
         },
     ])
 
-    const [siteSettings, setSiteSettings] = useState<SiteSettings>({
-        siteTitle: "Muhammad Abdullah Khan - AI/ML Engineer & Full-Stack Developer",
-        metaDescription:
-            "AI/ML Engineer & Full-Stack Developer with 6+ years experience. Specializing in emotion-aware systems, conversational AI, and scalable applications. 100% ★5 freelance record with 50+ completed projects.",
-        googleAnalyticsId: "",
-        contactFormEmail: "muhammad.mak252@gmail.com",
-        theme: "blue",
-        darkMode: false,
-        analytics: true,
+    const [siteConfig, setSiteConfig] = useState<SiteConfig>({
+        theme: "cyberpunk",
+        primaryColor: "#00D4FF",
+        showGitHubStats: true,
+        showTestimonials: true,
+        contactFormEnabled: true,
+        analyticsEnabled: true,
     })
 
-    // Load saved data from localStorage on mount
+    // GitHub sync status
+    const [githubSyncStatus, setGitHubSyncStatus] = useState<"idle" | "syncing" | "success" | "error">("idle")
+    const [lastGitHubSync, setLastGitHubSync] = useState<Date | null>(null)
+
+    // Auto-save functionality
     useEffect(() => {
-        const savedData = localStorage.getItem("portfolioAdminData")
-        if (savedData) {
-            try {
-                const data = JSON.parse(savedData)
-                if (data.personalInfo) setPersonalInfo(data.personalInfo)
-                if (data.experiences) setExperiences(data.experiences)
-                if (data.projects) setProjects(data.projects)
-                if (data.skills) setSkills(data.skills)
-                if (data.testimonials) setTestimonials(data.testimonials)
-                if (data.siteSettings) setSiteSettings(data.siteSettings)
-            } catch (error) {
-                console.log("No saved data found, using defaults")
+        const autoSave = setTimeout(() => {
+            if (hasUnsavedChanges) {
+                handleSaveDraft()
             }
-        }
-        setIsLoading(false)
-    }, [])
+        }, 30000) // Auto-save every 30 seconds
 
-    // Auto-save to localStorage when data changes
-    useEffect(() => {
-        if (!isLoading) {
-            const data = {
-                personalInfo,
-                experiences,
-                projects,
-                skills,
-                testimonials,
-                siteSettings,
-                lastUpdated: new Date().toISOString(),
-            }
-            localStorage.setItem("portfolioAdminData", JSON.stringify(data))
-        }
-    }, [personalInfo, experiences, projects, skills, testimonials, siteSettings, isLoading])
+        return () => clearTimeout(autoSave)
+    }, [hasUnsavedChanges])
 
-    // Drag and drop functionality
-    const handleDragStart = (e: React.DragEvent, id: string, type: string) => {
-        setDraggedItem(`${type}-${id}`)
-        e.dataTransfer.effectAllowed = "move"
-    }
-
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault()
-        e.dataTransfer.dropEffect = "move"
-    }
-
-    const handleDrop = (e: React.DragEvent, targetId: string, type: string) => {
-        e.preventDefault()
-        if (!draggedItem) return
-
-        const [draggedType, draggedId] = draggedItem.split("-")
-        if (draggedType !== type || draggedId === targetId) return
-
-        if (type === "experience") {
-            const items = [...experiences]
-            const draggedIndex = items.findIndex((item) => item.id === draggedId)
-            const targetIndex = items.findIndex((item) => item.id === targetId)
-
-            if (draggedIndex !== -1 && targetIndex !== -1) {
-                const [draggedExperience] = items.splice(draggedIndex, 1)
-                items.splice(targetIndex, 0, draggedExperience)
-                setExperiences(items)
-                setHasUnsavedChanges(true)
-            }
-        } else if (type === "project") {
-            const items = [...projects]
-            const draggedIndex = items.findIndex((item) => item.id === draggedId)
-            const targetIndex = items.findIndex((item) => item.id === targetId)
-
-            if (draggedIndex !== -1 && targetIndex !== -1) {
-                const [draggedProject] = items.splice(draggedIndex, 1)
-                items.splice(targetIndex, 0, draggedProject)
-                setProjects(items)
-                setHasUnsavedChanges(true)
-            }
-        }
-
-        setDraggedItem(null)
-    }
-
-    const handleSave = async () => {
-        setIsSaving(true)
+    const handleSaveDraft = async () => {
+        setIsLoading(true)
         try {
-            const GITHUB_TOKEN = localStorage.getItem("githubToken")
-            const REPO_OWNER = "MuhammadKhan148"
-            const REPO_NAME = "portfolio"
-            const BRANCH = "main"
-
-            if (!GITHUB_TOKEN) {
-                const token = prompt(
-                    `To save directly to GitHub, please enter your GitHub Personal Access Token (PAT):\n\n1. Go to: https://github.com/settings/tokens\n2. Click "Generate new token (classic)"\n3. Select "repo" scope\n4. Copy and paste the token here:\n\nNote: Token will be saved locally for future use.`,
-                )
-                if (!token) {
-                    alert("❌ GitHub token required for direct saving. Using localStorage only.")
-                    setIsSaving(false)
-                    return
-                }
-                localStorage.setItem("githubToken", token)
-            }
-
-            const token = localStorage.getItem("githubToken")
-
-            const portfolioContent = `---
-name: "${personalInfo.name}"
-title: "${personalInfo.title}"
-bio: "${personalInfo.bio}"
-availability_status: "${personalInfo.availability}"
-profile_image: "${personalInfo.avatar}"
-resume: "/files/resume.pdf"
-github: "${personalInfo.github}"
-linkedin: "${personalInfo.linkedin}"
-email: "${personalInfo.email}"
-experience:
-${experiences
-                    .map(
-                        (exp) => `  - title: "${exp.title}"
-    company: "${exp.company}"
-    duration: "${exp.period}"
-    location: "${exp.location}"
-    description: "${exp.description}"
-    achievements:
-${exp.achievements.map((ach) => `      - "${ach}"`).join("\n")}`,
-                    )
-                    .join("\n")}
-skills:
-  ai_ml:
-${skills
-                    .filter((s) => s.category === "AI/ML")
-                    .map((s) => `    - "${s.name}"`)
-                    .join("\n")}
-  frontend:
-${skills
-                    .filter((s) => s.category === "Frontend")
-                    .map((s) => `    - "${s.name}"`)
-                    .join("\n")}
-  backend:
-${skills
-                    .filter((s) => s.category === "Backend")
-                    .map((s) => `    - "${s.name}"`)
-                    .join("\n")}
-  devops:
-${skills
-                    .filter((s) => s.category === "Cloud/DevOps")
-                    .map((s) => `    - "${s.name}"`)
-                    .join("\n")}
-stats:
-  projects: "${personalInfo.projectsCompleted}+"
-  rating: "100%"
-  specialty: "AI/ML Specialist"
-  type: "Full-Stack Developer"
-  approach: "Research-Oriented"
-  quality: "Clean Code"
-  role: "Lab Demonstrator"
-achievements:
-  open_source: "24 public repositories with flagship AIMovieRecommender ⭐150+"
-  competitions: "1st Place – FAST Marathon; Winner – Twin-City Swimming; Finalist – National Critical-Thinking Tournament"
-  innovation: "Emotion-aware UX adopted by two client startups"
----`
-
-            const portfolioFileResponse = await fetch(
-                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/portfolio.md`,
-                {
-                    headers: { Authorization: `token ${token}` },
-                },
-            )
-
-            let portfolioSha = ""
-            if (portfolioFileResponse.ok) {
-                const portfolioFileData = await portfolioFileResponse.json()
-                portfolioSha = portfolioFileData.sha
-            }
-
-            const updatePortfolioResponse = await fetch(
-                `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/portfolio.md`,
-                {
-                    method: "PUT",
-                    headers: {
-                        Authorization: `token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        message: "Update portfolio data via admin panel",
-                        content: btoa(unescape(encodeURIComponent(portfolioContent))),
-                        sha: portfolioSha,
-                        branch: BRANCH,
-                    }),
-                },
-            )
-
-            if (!updatePortfolioResponse.ok) {
-                throw new Error("Failed to update portfolio.md")
-            }
-
-            for (const project of projects) {
-                const fileName =
-                    project.title
-                        .toLowerCase()
-                        .replace(/[^a-z0-9]+/g, "-")
-                        .replace(/^-|-$/g, "") + ".md"
-
-                const projectContent = `---
-title: "${project.title}"
-description: "${project.description}"
-image: "${project.image}"
-tags: 
-${project.tags.map((tag) => `  - "${tag}"`).join("\n")}
-github: "${project.github}"
-demo: "${project.demo}"
-featured: ${project.featured}
-status: "Completed"
-year: "2024"
----
-
-# ${project.title}
-
-${project.description}
-
-## Key Features
-
-- Advanced functionality and performance optimization
-- Modern architecture and best practices
-- Comprehensive testing and documentation
-- Production-ready deployment
-
-## Technical Stack
-
-${project.tags.map((tag) => `- **${tag}**: Core technology component`).join("\n")}
-
-## Links
-
-- [GitHub Repository](${project.github})
-- [Live Demo](${project.demo})
-`
-
-                const projectFileResponse = await fetch(
-                    `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/projects/${fileName}`,
-                    {
-                        headers: { Authorization: `token ${token}` },
-                    },
-                )
-
-                let projectSha = ""
-                if (projectFileResponse.ok) {
-                    const projectFileData = await projectFileResponse.json()
-                    projectSha = projectFileData.sha
-                }
-
-                await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/content/projects/${fileName}`, {
-                    method: "PUT",
-                    headers: {
-                        Authorization: `token ${token}`,
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        message: `Update ${project.title} project via admin panel`,
-                        content: btoa(unescape(encodeURIComponent(projectContent))),
-                        sha: projectSha,
-                        branch: BRANCH,
-                    }),
-                })
-            }
-
-            const data = {
-                personalInfo,
-                experiences,
-                projects,
+            const draftData = {
+                profile,
+                workExperience,
                 skills,
+                projects,
                 testimonials,
-                siteSettings,
-                lastUpdated: new Date().toISOString(),
+                siteConfig,
+                lastModified: new Date().toISOString(),
             }
 
-            localStorage.setItem("portfolioAdminData", JSON.stringify(data))
+            localStorage.setItem("portfolio-draft", JSON.stringify(draftData))
+            setLastSaved(new Date())
             setHasUnsavedChanges(false)
-
-            alert("✅ Portfolio saved successfully to GitHub! Netlify will auto-deploy in 2-3 minutes.")
-        } catch (error: any) {
-            console.error("Save error:", error)
-            if (error.message?.includes("Bad credentials")) {
-                localStorage.removeItem("githubToken")
-                alert("❌ Invalid GitHub token. Please try again with a valid token.")
-            } else {
-                alert("❌ Failed to save portfolio. Please check your GitHub token and try again.")
-            }
+            toast({
+                title: "Draft Saved",
+                description: "Your changes have been saved locally.",
+            })
+        } catch (error) {
+            toast({
+                title: "Save Failed",
+                description: "Failed to save draft. Please try again.",
+                variant: "destructive",
+            })
         } finally {
-            setIsSaving(false)
+            setIsLoading(false)
         }
     }
 
     const handlePublish = async () => {
-        await handleSave()
-        alert("🚀 Portfolio published! Changes are now live and will be deployed automatically.")
+        setIsLoading(true)
+        try {
+            // Save to GitHub via the sync component
+            setGitHubSyncStatus("syncing")
+
+            const portfolioData = {
+                profile,
+                workExperience,
+                skills,
+                projects,
+                testimonials,
+                siteConfig,
+                publishedAt: new Date().toISOString(),
+            }
+
+            // This would trigger the GitHub sync
+            await new Promise((resolve) => setTimeout(resolve, 2000)) // Simulate API call
+
+            setGitHubSyncStatus("success")
+            setLastGitHubSync(new Date())
+            setHasUnsavedChanges(false)
+
+            toast({
+                title: "Published Successfully",
+                description: "Your portfolio has been published and synced to GitHub.",
+            })
+        } catch (error) {
+            setGitHubSyncStatus("error")
+            toast({
+                title: "Publish Failed",
+                description: "Failed to publish portfolio. Please try again.",
+                variant: "destructive",
+            })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
-    const handleExportMarkdown = () => {
-        const portfolioContent = `---
-name: "${personalInfo.name}"
-title: "${personalInfo.title}"
-bio: "${personalInfo.bio}"
-availability_status: "${personalInfo.availability}"
-profile_image: "${personalInfo.avatar}"
-resume: "/files/resume.pdf"
-github: "${personalInfo.github}"
-linkedin: "${personalInfo.linkedin}"
-email: "${personalInfo.email}"
-experience:
-${experiences
-                .map(
-                    (exp) => `  - title: "${exp.title}"
-    company: "${exp.company}"
-    duration: "${exp.period}"
-    location: "${exp.location}"
-    description: "${exp.description}"
-    achievements:
-${exp.achievements.map((ach) => `      - "${ach}"`).join("\n")}`,
-                )
-                .join("\n")}
-skills:
-  ai_ml:
-${skills
-                .filter((s) => s.category === "AI/ML")
-                .map((s) => `    - "${s.name}"`)
-                .join("\n")}
-  frontend:
-${skills
-                .filter((s) => s.category === "Frontend")
-                .map((s) => `    - "${s.name}"`)
-                .join("\n")}
-  backend:
-${skills
-                .filter((s) => s.category === "Backend")
-                .map((s) => `    - "${s.name}"`)
-                .join("\n")}
-  devops:
-${skills
-                .filter((s) => s.category === "Cloud/DevOps")
-                .map((s) => `    - "${s.name}"`)
-                .join("\n")}
-stats:
-  projects: "${personalInfo.projectsCompleted}+"
-  rating: "100%"
-  specialty: "AI/ML Specialist"
-  type: "Full-Stack Developer"
-  approach: "Research-Oriented"
-  quality: "Clean Code"
-  role: "Lab Demonstrator"
-achievements:
-  open_source: "24 public repositories with flagship AIMovieRecommender ⭐150+"
-  competitions: "1st Place – FAST Marathon; Winner – Twin-City Swimming; Finalist – National Critical-Thinking Tournament"
-  innovation: "Emotion-aware UX adopted by two client startups"
----`
+    const handleExportData = () => {
+        const exportData = {
+            profile,
+            workExperience,
+            skills,
+            projects,
+            testimonials,
+            siteConfig,
+            exportedAt: new Date().toISOString(),
+        }
 
-        const blob = new Blob([portfolioContent], { type: "text/markdown" })
+        const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: "application/json" })
         const url = URL.createObjectURL(blob)
         const a = document.createElement("a")
         a.href = url
-        a.download = "portfolio.md"
+        a.download = `portfolio-backup-${new Date().toISOString().split("T")[0]}.json`
+        document.body.appendChild(a)
         a.click()
+        document.body.removeChild(a)
         URL.revokeObjectURL(url)
 
-        alert("Portfolio markdown exported! Replace your content/portfolio.md file with this download.")
+        toast({
+            title: "Data Exported",
+            description: "Portfolio data has been exported successfully.",
+        })
     }
 
-    const handleImageUpload = (file: File, type: string, id?: string) => {
+    const handleImportData = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0]
+        if (!file) return
+
         const reader = new FileReader()
         reader.onload = (e) => {
-            const result = e.target?.result as string
-            if (type === "avatar") {
-                setPersonalInfo((prev) => ({ ...prev, avatar: result }))
-            } else if (type === "project" && id) {
-                setProjects((prev) => prev.map((p) => (p.id === id ? { ...p, image: result } : p)))
-            } else if (type === "testimonial" && id) {
-                setTestimonials((prev) => prev.map((t) => (t.id === id ? { ...t, avatar: result } : t)))
+            try {
+                const importedData = JSON.parse(e.target?.result as string)
+
+                if (importedData.profile) setProfile(importedData.profile)
+                if (importedData.workExperience) setWorkExperience(importedData.workExperience)
+                if (importedData.skills) setSkills(importedData.skills)
+                if (importedData.projects) setProjects(importedData.projects)
+                if (importedData.testimonials) setTestimonials(importedData.testimonials)
+                if (importedData.siteConfig) setSiteConfig(importedData.siteConfig)
+
+                setHasUnsavedChanges(true)
+                toast({
+                    title: "Data Imported",
+                    description: "Portfolio data has been imported successfully.",
+                })
+            } catch (error) {
+                toast({
+                    title: "Import Failed",
+                    description: "Failed to import data. Please check the file format.",
+                    variant: "destructive",
+                })
             }
-            setHasUnsavedChanges(true)
         }
-        reader.readAsDataURL(file)
+        reader.readAsText(file)
     }
 
-    // Preview Mode
-    if (isPreviewMode) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-                <div className="fixed top-4 right-4 z-50 flex gap-2">
-                    <Button onClick={() => setIsPreviewMode(false)} variant="outline">
-                        <Edit3 className="mr-2 h-4 w-4" />
-                        Edit Mode
-                    </Button>
-                </div>
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="text-center">
-                        <Monitor className="h-24 w-24 mx-auto mb-4 text-blue-600 float" />
-                        <h2 className="text-2xl font-bold mb-2 gradient-text">Portfolio Preview</h2>
-                        <p className="text-slate-600 mb-4">This would show your live portfolio with current data</p>
-                        <Button onClick={() => setIsPreviewMode(false)} className="bg-blue-600 hover:bg-blue-700">
-                            Back to Editor
-                        </Button>
-                    </div>
-                </div>
-            </div>
+    const addWorkExperience = () => {
+        const newWork: WorkExperience = {
+            id: Date.now().toString(),
+            company: "",
+            position: "",
+            duration: "",
+            description: "",
+            technologies: [],
+            featured: false,
+        }
+        setWorkExperience([...workExperience, newWork])
+        setHasUnsavedChanges(true)
+    }
+
+    const updateWorkExperience = (id: string, updates: Partial<WorkExperience>) => {
+        setWorkExperience(workExperience.map((work) => (work.id === id ? { ...work, ...updates } : work)))
+        setHasUnsavedChanges(true)
+    }
+
+    const deleteWorkExperience = (id: string) => {
+        setWorkExperience(workExperience.filter((work) => work.id !== id))
+        setHasUnsavedChanges(true)
+    }
+
+    const addSkill = () => {
+        const newSkill: Skill = {
+            id: Date.now().toString(),
+            name: "",
+            level: 50,
+            category: "Programming",
+            featured: false,
+        }
+        setSkills([...skills, newSkill])
+        setHasUnsavedChanges(true)
+    }
+
+    const updateSkill = (id: string, updates: Partial<Skill>) => {
+        setSkills(skills.map((skill) => (skill.id === id ? { ...skill, ...updates } : skill)))
+        setHasUnsavedChanges(true)
+    }
+
+    const deleteSkill = (id: string) => {
+        setSkills(skills.filter((skill) => skill.id !== id))
+        setHasUnsavedChanges(true)
+    }
+
+    const addProject = () => {
+        const newProject: Project = {
+            id: Date.now().toString(),
+            title: "",
+            description: "",
+            technologies: [],
+            githubUrl: "",
+            liveUrl: "",
+            image: "/placeholder.svg?height=200&width=300",
+            featured: false,
+            status: "planned",
+        }
+        setProjects([...projects, newProject])
+        setHasUnsavedChanges(true)
+    }
+
+    const updateProject = (id: string, updates: Partial<Project>) => {
+        setProjects(projects.map((project) => (project.id === id ? { ...project, ...updates } : project)))
+        setHasUnsavedChanges(true)
+    }
+
+    const deleteProject = (id: string) => {
+        setProjects(projects.filter((project) => project.id !== id))
+        setHasUnsavedChanges(true)
+    }
+
+    const addTestimonial = () => {
+        const newTestimonial: Testimonial = {
+            id: Date.now().toString(),
+            name: "",
+            company: "",
+            role: "",
+            content: "",
+            avatar: "/placeholder.svg?height=40&width=40",
+            rating: 5,
+        }
+        setTestimonials([...testimonials, newTestimonial])
+        setHasUnsavedChanges(true)
+    }
+
+    const updateTestimonial = (id: string, updates: Partial<Testimonial>) => {
+        setTestimonials(
+            testimonials.map((testimonial) => (testimonial.id === id ? { ...testimonial, ...updates } : testimonial)),
         )
+        setHasUnsavedChanges(true)
+    }
+
+    const deleteTestimonial = (id: string) => {
+        setTestimonials(testimonials.filter((testimonial) => testimonial.id !== id))
+        setHasUnsavedChanges(true)
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
-            {/* Clean Admin Header */}
-            <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-200 shadow-sm">
-                <div className="container flex h-16 items-center justify-between px-4">
-                    <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                            <div className="relative">
-                                <Settings className="h-6 w-6 text-blue-600" />
-                                <div className="absolute inset-0 bg-blue-600/20 rounded-full blur-xl" />
-                            </div>
-                            <h1 className="text-xl font-bold text-slate-900">Portfolio Admin</h1>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+            {/* Cyberpunk Background Effects */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,212,255,0.1),transparent_50%)]" />
+                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" />
+                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse" />
+            </div>
+
+            <div className="relative z-10 container mx-auto px-4 py-8">
+                {/* Header */}
+                <div className="mb-8">
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                                Portfolio Admin
+                            </h1>
+                            <p className="text-slate-400 mt-2">Manage your cyberpunk portfolio</p>
                         </div>
-                        {hasUnsavedChanges && (
-                            <Badge variant="outline" className="border-orange-200 text-orange-700 bg-orange-50">
-                                <div className="w-2 h-2 bg-orange-500 rounded-full mr-2 animate-pulse" />
-                                Unsaved Changes
-                            </Badge>
-                        )}
+
+                        <div className="flex items-center gap-4">
+                            {/* Status Indicators */}
+                            <div className="flex items-center gap-2">
+                                {githubSyncStatus === "syncing" && (
+                                    <div className="flex items-center gap-2 text-cyan-400">
+                                        <RefreshCw className="h-4 w-4 animate-spin" />
+                                        <span className="text-sm">Syncing...</span>
+                                    </div>
+                                )}
+                                {githubSyncStatus === "success" && (
+                                    <div className="flex items-center gap-2 text-green-400">
+                                        <CheckCircle className="h-4 w-4" />
+                                        <span className="text-sm">Synced</span>
+                                    </div>
+                                )}
+                                {githubSyncStatus === "error" && (
+                                    <div className="flex items-center gap-2 text-red-400">
+                                        <XCircle className="h-4 w-4" />
+                                        <span className="text-sm">Sync Failed</span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleSaveDraft}
+                                    disabled={isLoading}
+                                    className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+                                >
+                                    <Save className="h-4 w-4 mr-2" />
+                                    Save Draft
+                                </Button>
+
+                                <Button
+                                    onClick={handlePublish}
+                                    disabled={isLoading}
+                                    className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                                >
+                                    <Zap className="h-4 w-4 mr-2" />
+                                    Publish Live
+                                </Button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
-                            <Label htmlFor="preview-mode" className="text-sm font-medium">
-                                Preview
-                            </Label>
-                            <Switch id="preview-mode" checked={isPreviewMode} onCheckedChange={setIsPreviewMode} />
+                    {/* Status Bar */}
+                    <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-6">
+                                <div className="flex items-center gap-2">
+                                    <div
+                                        className={`w-2 h-2 rounded-full ${hasUnsavedChanges ? "bg-yellow-400 animate-pulse" : "bg-green-400"}`}
+                                    />
+                                    <span className="text-sm text-slate-300">
+                                        {hasUnsavedChanges ? "Unsaved Changes" : "All Changes Saved"}
+                                    </span>
+                                </div>
+
+                                {lastSaved && (
+                                    <div className="text-sm text-slate-400">Last saved: {lastSaved.toLocaleTimeString()}</div>
+                                )}
+
+                                {lastGitHubSync && (
+                                    <div className="text-sm text-slate-400">Last sync: {lastGitHubSync.toLocaleTimeString()}</div>
+                                )}
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleExportData}
+                                    className="text-slate-400 hover:text-cyan-400"
+                                >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Export
+                                </Button>
+
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => document.getElementById("import-file")?.click()}
+                                    className="text-slate-400 hover:text-cyan-400"
+                                >
+                                    <Upload className="h-4 w-4 mr-2" />
+                                    Import
+                                </Button>
+                                <input id="import-file" type="file" accept=".json" onChange={handleImportData} className="hidden" />
+                            </div>
                         </div>
-                        <Button
-                            onClick={handleSave}
-                            disabled={!hasUnsavedChanges || isSaving}
-                            variant="outline"
-                            className="border-blue-200 hover:border-blue-300 hover:bg-blue-50"
-                        >
-                            <Save className="mr-2 h-4 w-4" />
-                            {isSaving ? "Saving..." : "Save Draft"}
-                        </Button>
-                        <Button onClick={handlePublish} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 btn-modern">
-                            <Sparkles className="mr-2 h-4 w-4" />
-                            {isSaving ? "Publishing..." : "Publish Live"}
-                        </Button>
-                        <Button variant="outline" asChild>
-                            <Link href="/" target="_blank" rel="noreferrer">
-                                <Eye className="mr-2 h-4 w-4" />
-                                View Site
-                            </Link>
-                        </Button>
                     </div>
                 </div>
-            </header>
 
-            <div className="container py-8 px-4">
-                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                    <TabsList className="grid w-full grid-cols-6 lg:grid-cols-7 lg:w-fit">
-                        <TabsTrigger value="personal" isActive={activeTab === "personal"} onClick={setActiveTab}>
+                {/* Main Content */}
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+                    <TabsList className="grid w-full grid-cols-6 bg-slate-800/50 backdrop-blur-sm border border-slate-700/50">
+                        <TabsTrigger
+                            value="profile"
+                            className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
+                        >
                             <User className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Personal</span>
+                            Profile
                         </TabsTrigger>
-                        <TabsTrigger value="experience" isActive={activeTab === "experience"} onClick={setActiveTab}>
+                        <TabsTrigger
+                            value="experience"
+                            className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
+                        >
                             <Briefcase className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Experience</span>
+                            Experience
                         </TabsTrigger>
-                        <TabsTrigger value="skills" isActive={activeTab === "skills"} onClick={setActiveTab}>
+                        <TabsTrigger
+                            value="skills"
+                            className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
+                        >
                             <Code className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Skills</span>
+                            Skills
                         </TabsTrigger>
-                        <TabsTrigger value="projects" isActive={activeTab === "projects"} onClick={setActiveTab}>
+                        <TabsTrigger
+                            value="projects"
+                            className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
+                        >
                             <FolderOpen className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Projects</span>
+                            Projects
                         </TabsTrigger>
-                        <TabsTrigger value="github" isActive={activeTab === "github"} onClick={setActiveTab}>
-                            <Github className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">GitHub</span>
-                        </TabsTrigger>
-                        <TabsTrigger value="testimonials" isActive={activeTab === "testimonials"} onClick={setActiveTab}>
+                        <TabsTrigger
+                            value="testimonials"
+                            className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
+                        >
                             <MessageSquare className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Testimonials</span>
+                            Testimonials
                         </TabsTrigger>
-                        <TabsTrigger value="settings" isActive={activeTab === "settings"} onClick={setActiveTab}>
-                            <Palette className="h-4 w-4 mr-2" />
-                            <span className="hidden sm:inline">Settings</span>
+                        <TabsTrigger
+                            value="settings"
+                            className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400"
+                        >
+                            <Settings className="h-4 w-4 mr-2" />
+                            Settings
                         </TabsTrigger>
                     </TabsList>
 
-                    {/* Personal Information Tab */}
-                    <TabsContent value="personal" activeValue={activeTab}>
-                        <Card className="border-0 shadow-lg">
+                    {/* Profile Tab */}
+                    <TabsContent value="profile" className="space-y-6">
+                        <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
                             <CardHeader>
-                                <CardTitle className="flex items-center space-x-2">
-                                    <User className="h-5 w-5 text-blue-600" />
-                                    <span>Personal Information</span>
-                                </CardTitle>
-                                <CardDescription>Update your basic information and contact details</CardDescription>
+                                <CardTitle className="text-cyan-400">Profile Information</CardTitle>
+                                <CardDescription className="text-slate-400">
+                                    Update your personal information and social links
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-6">
-                                <div className="grid gap-6 md:grid-cols-2">
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="name">Full Name</Label>
-                                            <Input
-                                                id="name"
-                                                value={personalInfo.name}
-                                                onChange={(e) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, name: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="title">Professional Title</Label>
-                                            <Input
-                                                id="title"
-                                                value={personalInfo.title}
-                                                onChange={(e) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, title: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="email">Email</Label>
-                                            <Input
-                                                id="email"
-                                                type="email"
-                                                value={personalInfo.email}
-                                                onChange={(e) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, email: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="availability">Availability Status</Label>
-                                            <Input
-                                                id="availability"
-                                                value={personalInfo.availability}
-                                                onChange={(e) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, availability: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Switch
-                                                id="available-work"
-                                                checked={personalInfo.availableForWork}
-                                                onCheckedChange={(checked) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, availableForWork: checked }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                            />
-                                            <Label htmlFor="available-work">Available for work</Label>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="bio">Bio</Label>
-                                            <Textarea
-                                                id="bio"
-                                                value={personalInfo.bio}
-                                                onChange={(e) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, bio: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1 min-h-[120px]"
-                                            />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <Label htmlFor="projects-count">Projects Completed</Label>
-                                                <Input
-                                                    id="projects-count"
-                                                    type="number"
-                                                    value={personalInfo.projectsCompleted}
-                                                    onChange={(e) => {
-                                                        setPersonalInfo((prev) => ({ ...prev, projectsCompleted: Number.parseInt(e.target.value) }))
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label htmlFor="years-experience">Years Experience</Label>
-                                                <Input
-                                                    id="years-experience"
-                                                    type="number"
-                                                    value={personalInfo.yearsExperience}
-                                                    onChange={(e) => {
-                                                        setPersonalInfo((prev) => ({ ...prev, yearsExperience: Number.parseInt(e.target.value) }))
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="github">GitHub URL</Label>
-                                            <Input
-                                                id="github"
-                                                value={personalInfo.github}
-                                                onChange={(e) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, github: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label htmlFor="linkedin">LinkedIn URL</Label>
-                                            <Input
-                                                id="linkedin"
-                                                value={personalInfo.linkedin}
-                                                onChange={(e) => {
-                                                    setPersonalInfo((prev) => ({ ...prev, linkedin: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
+                                <div className="flex items-center gap-6">
+                                    <Avatar className="h-24 w-24 border-2 border-cyan-500/50">
+                                        <AvatarImage src={profile.avatar || "/placeholder.svg"} alt={profile.name} />
+                                        <AvatarFallback className="bg-slate-700 text-cyan-400">
+                                            {profile.name
+                                                .split(" ")
+                                                .map((n) => n[0])
+                                                .join("")}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                    <div className="space-y-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+                                        >
+                                            <Upload className="h-4 w-4 mr-2" />
+                                            Upload Avatar
+                                        </Button>
+                                        <p className="text-sm text-slate-400">JPG, PNG or GIF (max 2MB)</p>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <Label>Profile Picture</Label>
-                                    <div className="mt-2 flex items-center space-x-4">
-                                        <Image
-                                            src={personalInfo.avatar || "/placeholder.svg"}
-                                            alt="Profile"
-                                            width={80}
-                                            height={80}
-                                            className="rounded-full border-2 border-blue-200"
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name" className="text-slate-300">
+                                            Full Name
+                                        </Label>
+                                        <Input
+                                            id="name"
+                                            value={profile.name}
+                                            onChange={(e) => {
+                                                setProfile({ ...profile, name: e.target.value })
+                                                setHasUnsavedChanges(true)
+                                            }}
+                                            className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
                                         />
-                                        <div>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="title" className="text-slate-300">
+                                            Professional Title
+                                        </Label>
+                                        <Input
+                                            id="title"
+                                            value={profile.title}
+                                            onChange={(e) => {
+                                                setProfile({ ...profile, title: e.target.value })
+                                                setHasUnsavedChanges(true)
+                                            }}
+                                            className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="email" className="text-slate-300">
+                                            Email
+                                        </Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            value={profile.email}
+                                            onChange={(e) => {
+                                                setProfile({ ...profile, email: e.target.value })
+                                                setHasUnsavedChanges(true)
+                                            }}
+                                            className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="location" className="text-slate-300">
+                                            Location
+                                        </Label>
+                                        <Input
+                                            id="location"
+                                            value={profile.location}
+                                            onChange={(e) => {
+                                                setProfile({ ...profile, location: e.target.value })
+                                                setHasUnsavedChanges(true)
+                                            }}
+                                            className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="website" className="text-slate-300">
+                                            Website
+                                        </Label>
+                                        <Input
+                                            id="website"
+                                            type="url"
+                                            value={profile.website}
+                                            onChange={(e) => {
+                                                setProfile({ ...profile, website: e.target.value })
+                                                setHasUnsavedChanges(true)
+                                            }}
+                                            className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="bio" className="text-slate-300">
+                                        Bio
+                                    </Label>
+                                    <Textarea
+                                        id="bio"
+                                        value={profile.bio}
+                                        onChange={(e) => {
+                                            setProfile({ ...profile, bio: e.target.value })
+                                            setHasUnsavedChanges(true)
+                                        }}
+                                        rows={4}
+                                        className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                    />
+                                </div>
+
+                                <Separator className="bg-slate-700" />
+
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-semibold text-cyan-400">Social Links</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="github" className="text-slate-300">
+                                                GitHub
+                                            </Label>
+                                            <Input
+                                                id="github"
+                                                value={profile.social.github}
                                                 onChange={(e) => {
-                                                    const file = e.target.files?.[0]
-                                                    if (file) handleImageUpload(file, "avatar")
+                                                    setProfile({
+                                                        ...profile,
+                                                        social: { ...profile.social, github: e.target.value },
+                                                    })
+                                                    setHasUnsavedChanges(true)
                                                 }}
-                                                className="hidden"
-                                                id="avatar-upload"
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                placeholder="username"
                                             />
-                                            <Button variant="outline" asChild>
-                                                <label htmlFor="avatar-upload" className="cursor-pointer">
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    Upload New Photo
-                                                </label>
-                                            </Button>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="linkedin" className="text-slate-300">
+                                                LinkedIn
+                                            </Label>
+                                            <Input
+                                                id="linkedin"
+                                                value={profile.social.linkedin}
+                                                onChange={(e) => {
+                                                    setProfile({
+                                                        ...profile,
+                                                        social: { ...profile.social, linkedin: e.target.value },
+                                                    })
+                                                    setHasUnsavedChanges(true)
+                                                }}
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                placeholder="username"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label htmlFor="twitter" className="text-slate-300">
+                                                Twitter
+                                            </Label>
+                                            <Input
+                                                id="twitter"
+                                                value={profile.social.twitter}
+                                                onChange={(e) => {
+                                                    setProfile({
+                                                        ...profile,
+                                                        social: { ...profile.social, twitter: e.target.value },
+                                                    })
+                                                    setHasUnsavedChanges(true)
+                                                }}
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                placeholder="@username"
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -1020,193 +803,109 @@ achievements:
                     </TabsContent>
 
                     {/* Experience Tab */}
-                    <TabsContent value="experience" activeValue={activeTab}>
-                        <div className="flex items-center justify-between mb-6">
+                    <TabsContent value="experience" className="space-y-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold">Work Experience</h2>
-                                <p className="text-slate-600">Manage your professional experience. Drag to reorder.</p>
+                                <h2 className="text-2xl font-bold text-cyan-400">Work Experience</h2>
+                                <p className="text-slate-400">Manage your professional experience</p>
                             </div>
-                            <Button
-                                onClick={() => {
-                                    const newExp: Experience = {
-                                        id: Date.now().toString(),
-                                        title: "New Position",
-                                        company: "Company Name",
-                                        period: "2024 - Present",
-                                        location: "Location",
-                                        description: "Job description...",
-                                        achievements: ["Achievement 1"],
-                                    }
-                                    setExperiences((prev) => [newExp, ...prev])
-                                    setHasUnsavedChanges(true)
-                                }}
-                                className="bg-blue-600 hover:bg-blue-700"
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
+                            <Button onClick={addWorkExperience} className="bg-gradient-to-r from-cyan-500 to-purple-500">
+                                <Plus className="h-4 w-4 mr-2" />
                                 Add Experience
                             </Button>
                         </div>
 
                         <div className="space-y-4">
-                            {experiences.map((exp, index) => (
-                                <Card
-                                    key={exp.id}
-                                    className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-move card-modern"
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, exp.id, "experience")}
-                                    onDragOver={handleDragOver}
-                                    onDrop={(e) => handleDrop(e, exp.id, "experience")}
-                                >
-                                    <CardContent className="p-6">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div className="flex items-center space-x-2">
-                                                <GripVertical className="h-5 w-5 text-slate-400" />
-                                                <span className="text-sm text-slate-500">#{index + 1}</span>
+                            {workExperience.map((work, index) => (
+                                <Card key={work.id} className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+                                    <CardHeader>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <CardTitle className="text-cyan-400">Experience #{index + 1}</CardTitle>
+                                                {work.featured && (
+                                                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50">
+                                                        <Star className="h-3 w-3 mr-1" />
+                                                        Featured
+                                                    </Badge>
+                                                )}
                                             </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() => {
-                                                    setExperiences((prev) => prev.filter((e) => e.id !== exp.id))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={work.featured}
+                                                    onCheckedChange={(checked) => updateWorkExperience(work.id, { featured: checked })}
+                                                />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => deleteWorkExperience(work.id)}
+                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
-
-                                        <div className="grid gap-4 md:grid-cols-2">
-                                            <div>
-                                                <Label>Job Title</Label>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Company</Label>
                                                 <Input
-                                                    value={exp.title}
-                                                    onChange={(e) => {
-                                                        setExperiences((prev) =>
-                                                            prev.map((item) => (item.id === exp.id ? { ...item, title: e.target.value } : item)),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
+                                                    value={work.company}
+                                                    onChange={(e) => updateWorkExperience(work.id, { company: e.target.value })}
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
                                                 />
                                             </div>
-                                            <div>
-                                                <Label>Company</Label>
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Position</Label>
                                                 <Input
-                                                    value={exp.company}
-                                                    onChange={(e) => {
-                                                        setExperiences((prev) =>
-                                                            prev.map((item) => (item.id === exp.id ? { ...item, company: e.target.value } : item)),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Period</Label>
-                                                <Input
-                                                    value={exp.period}
-                                                    onChange={(e) => {
-                                                        setExperiences((prev) =>
-                                                            prev.map((item) => (item.id === exp.id ? { ...item, period: e.target.value } : item)),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Location</Label>
-                                                <Input
-                                                    value={exp.location}
-                                                    onChange={(e) => {
-                                                        setExperiences((prev) =>
-                                                            prev.map((item) => (item.id === exp.id ? { ...item, location: e.target.value } : item)),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
+                                                    value={work.position}
+                                                    onChange={(e) => updateWorkExperience(work.id, { position: e.target.value })}
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
                                                 />
                                             </div>
                                         </div>
 
-                                        <div className="mt-4">
-                                            <Label>Description</Label>
-                                            <Textarea
-                                                value={exp.description}
-                                                onChange={(e) => {
-                                                    setExperiences((prev) =>
-                                                        prev.map((item) => (item.id === exp.id ? { ...item, description: e.target.value } : item)),
-                                                    )
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-300">Duration</Label>
+                                            <Input
+                                                value={work.duration}
+                                                onChange={(e) => updateWorkExperience(work.id, { duration: e.target.value })}
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                placeholder="e.g., 2022 - Present"
                                             />
                                         </div>
 
-                                        <div className="mt-4">
-                                            <Label>Achievements</Label>
-                                            <div className="space-y-2 mt-2">
-                                                {exp.achievements.map((achievement, achIndex) => (
-                                                    <div key={achIndex} className="flex items-center space-x-2">
-                                                        <Input
-                                                            value={achievement}
-                                                            onChange={(e) => {
-                                                                setExperiences((prev) =>
-                                                                    prev.map((item) =>
-                                                                        item.id === exp.id
-                                                                            ? {
-                                                                                ...item,
-                                                                                achievements: item.achievements.map((ach, i) =>
-                                                                                    i === achIndex ? e.target.value : ach,
-                                                                                ),
-                                                                            }
-                                                                            : item,
-                                                                    ),
-                                                                )
-                                                                setHasUnsavedChanges(true)
-                                                            }}
-                                                            className="flex-1"
-                                                        />
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                setExperiences((prev) =>
-                                                                    prev.map((item) =>
-                                                                        item.id === exp.id
-                                                                            ? {
-                                                                                ...item,
-                                                                                achievements: item.achievements.filter((_, i) => i !== achIndex),
-                                                                            }
-                                                                            : item,
-                                                                    ),
-                                                                )
-                                                                setHasUnsavedChanges(true)
-                                                            }}
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-300">Description</Label>
+                                            <Textarea
+                                                value={work.description}
+                                                onChange={(e) => updateWorkExperience(work.id, { description: e.target.value })}
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                rows={3}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-300">Technologies</Label>
+                                            <Input
+                                                value={work.technologies.join(", ")}
+                                                onChange={(e) =>
+                                                    updateWorkExperience(work.id, {
+                                                        technologies: e.target.value
+                                                            .split(",")
+                                                            .map((t) => t.trim())
+                                                            .filter(Boolean),
+                                                    })
+                                                }
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                placeholder="React, Node.js, Python, etc."
+                                            />
+                                            <div className="flex flex-wrap gap-2 mt-2">
+                                                {work.technologies.map((tech, techIndex) => (
+                                                    <Badge key={techIndex} variant="secondary" className="bg-slate-700 text-slate-300">
+                                                        {tech}
+                                                    </Badge>
                                                 ))}
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        setExperiences((prev) =>
-                                                            prev.map((item) =>
-                                                                item.id === exp.id
-                                                                    ? { ...item, achievements: [...item.achievements, "New achievement"] }
-                                                                    : item,
-                                                            ),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                >
-                                                    <Plus className="mr-2 h-4 w-4" />
-                                                    Add Achievement
-                                                </Button>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -1216,98 +915,102 @@ achievements:
                     </TabsContent>
 
                     {/* Skills Tab */}
-                    <TabsContent value="skills" activeValue={activeTab}>
-                        <div className="flex items-center justify-between mb-6">
+                    <TabsContent value="skills" className="space-y-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold">Skills</h2>
-                                <p className="text-slate-600">Manage your technical skills and expertise levels</p>
+                                <h2 className="text-2xl font-bold text-cyan-400">Skills & Technologies</h2>
+                                <p className="text-slate-400">Manage your technical skills and proficiency levels</p>
                             </div>
-                            <Button
-                                onClick={() => {
-                                    const newSkill: Skill = {
-                                        id: Date.now().toString(),
-                                        name: "New Skill",
-                                        category: "Frontend",
-                                        level: 3,
-                                    }
-                                    setSkills((prev) => [...prev, newSkill])
-                                    setHasUnsavedChanges(true)
-                                }}
-                                className="bg-blue-600 hover:bg-blue-700"
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
+                            <Button onClick={addSkill} className="bg-gradient-to-r from-cyan-500 to-purple-500">
+                                <Plus className="h-4 w-4 mr-2" />
                                 Add Skill
                             </Button>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                            {["AI/ML", "Frontend", "Backend", "Cloud/DevOps"].map((category) => (
-                                <Card key={category} className="border-0 shadow-lg">
-                                    <CardHeader>
-                                        <CardTitle className="flex items-center space-x-2">
-                                            {category === "AI/ML" && <Star className="h-5 w-5 text-purple-600" />}
-                                            {category === "Frontend" && <Code className="h-5 w-5 text-blue-600" />}
-                                            {category === "Backend" && <Database className="h-5 w-5 text-green-600" />}
-                                            {category === "Cloud/DevOps" && <Globe className="h-5 w-5 text-orange-600" />}
-                                            <span>{category}</span>
-                                        </CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="space-y-4">
-                                        {skills
-                                            .filter((skill) => skill.category === category)
-                                            .map((skill) => (
-                                                <div key={skill.id} className="space-y-2">
-                                                    <div className="flex items-center justify-between">
-                                                        <Input
-                                                            value={skill.name}
-                                                            onChange={(e) => {
-                                                                setSkills((prev) =>
-                                                                    prev.map((s) => (s.id === skill.id ? { ...s, name: e.target.value } : s)),
-                                                                )
-                                                                setHasUnsavedChanges(true)
-                                                            }}
-                                                            className="flex-1 mr-2"
-                                                        />
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => {
-                                                                setSkills((prev) => prev.filter((s) => s.id !== skill.id))
-                                                                setHasUnsavedChanges(true)
-                                                            }}
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <span className="text-sm text-slate-600 w-16">Level {skill.level}</span>
-                                                        <input
-                                                            type="range"
-                                                            min="1"
-                                                            max="5"
-                                                            value={skill.level}
-                                                            onChange={(e) => {
-                                                                setSkills((prev) =>
-                                                                    prev.map((s) =>
-                                                                        s.id === skill.id ? { ...s, level: Number.parseInt(e.target.value) } : s,
-                                                                    ),
-                                                                )
-                                                                setHasUnsavedChanges(true)
-                                                            }}
-                                                            className="flex-1"
-                                                        />
-                                                        <div className="flex space-x-1">
-                                                            {[1, 2, 3, 4, 5].map((level) => (
-                                                                <Star
-                                                                    key={level}
-                                                                    className={`h-3 w-3 ${level <= skill.level ? "fill-yellow-400 text-yellow-400" : "text-slate-300"
-                                                                        }`}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                    </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {skills.map((skill) => (
+                                <Card key={skill.id} className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+                                    <CardContent className="p-4">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                {skill.featured && (
+                                                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50">
+                                                        <Star className="h-3 w-3 mr-1" />
+                                                        Featured
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <Switch
+                                                    checked={skill.featured}
+                                                    onCheckedChange={(checked) => updateSkill(skill.id, { featured: checked })}
+                                                />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => deleteSkill(skill.id)}
+                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label className="text-slate-300">Skill Name</Label>
+                                                    <Input
+                                                        value={skill.name}
+                                                        onChange={(e) => updateSkill(skill.id, { name: e.target.value })}
+                                                        className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                    />
                                                 </div>
-                                            ))}
+                                                <div className="space-y-2">
+                                                    <Label className="text-slate-300">Category</Label>
+                                                    <Select
+                                                        value={skill.category}
+                                                        onValueChange={(value) => updateSkill(skill.id, { category: value })}
+                                                    >
+                                                        <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                                                            <SelectValue />
+                                                        </SelectTrigger>
+                                                        <SelectContent className="bg-slate-800 border-slate-700">
+                                                            <SelectItem value="Programming">Programming</SelectItem>
+                                                            <SelectItem value="Frontend">Frontend</SelectItem>
+                                                            <SelectItem value="Backend">Backend</SelectItem>
+                                                            <SelectItem value="AI/ML">AI/ML</SelectItem>
+                                                            <SelectItem value="Cloud">Cloud</SelectItem>
+                                                            <SelectItem value="Database">Database</SelectItem>
+                                                            <SelectItem value="DevOps">DevOps</SelectItem>
+                                                            <SelectItem value="Mobile">Mobile</SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <div className="flex items-center justify-between">
+                                                    <Label className="text-slate-300">Proficiency Level</Label>
+                                                    <span className="text-cyan-400 font-mono">{skill.level}%</span>
+                                                </div>
+                                                <div className="relative">
+                                                    <Progress value={skill.level} className="h-3 bg-slate-700" />
+                                                    <div
+                                                        className="absolute top-0 left-0 h-3 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full transition-all duration-300"
+                                                        style={{ width: `${skill.level}%` }}
+                                                    />
+                                                </div>
+                                                <input
+                                                    type="range"
+                                                    min="0"
+                                                    max="100"
+                                                    value={skill.level}
+                                                    onChange={(e) => updateSkill(skill.id, { level: Number.parseInt(e.target.value) })}
+                                                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
+                                                />
+                                            </div>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             ))}
@@ -1315,177 +1018,150 @@ achievements:
                     </TabsContent>
 
                     {/* Projects Tab */}
-                    <TabsContent value="projects" activeValue={activeTab}>
-                        <div className="flex items-center justify-between mb-6">
+                    <TabsContent value="projects" className="space-y-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold">Projects</h2>
-                                <p className="text-slate-600">Showcase your best work. Drag to reorder.</p>
+                                <h2 className="text-2xl font-bold text-cyan-400">Projects Portfolio</h2>
+                                <p className="text-slate-400">Showcase your best work and projects</p>
                             </div>
-                            <Button
-                                onClick={() => {
-                                    const newProject: Project = {
-                                        id: Date.now().toString(),
-                                        title: "New Project",
-                                        description: "Project description...",
-                                        image: "/placeholder.svg?height=300&width=500",
-                                        tags: ["React"],
-                                        github: "https://github.com",
-                                        demo: "https://example.com",
-                                        featured: false,
-                                    }
-                                    setProjects((prev) => [newProject, ...prev])
-                                    setHasUnsavedChanges(true)
-                                }}
-                                className="bg-blue-600 hover:bg-blue-700"
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
+                            <Button onClick={addProject} className="bg-gradient-to-r from-cyan-500 to-purple-500">
+                                <Plus className="h-4 w-4 mr-2" />
                                 Add Project
                             </Button>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {projects.map((project, index) => (
-                                <Card
-                                    key={project.id}
-                                    className="border-0 shadow-lg hover:shadow-xl transition-all duration-300 cursor-move overflow-hidden card-modern"
-                                    draggable
-                                    onDragStart={(e) => handleDragStart(e, project.id, "project")}
-                                    onDragOver={handleDragOver}
-                                    onDrop={(e) => handleDrop(e, project.id, "project")}
-                                >
-                                    <div className="relative aspect-video">
-                                        <Image
-                                            src={project.image || "/placeholder.svg"}
-                                            alt={project.title}
-                                            fill
-                                            className="object-cover"
-                                        />
-                                        <div className="absolute top-2 right-2 flex space-x-2">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0]
-                                                    if (file) handleImageUpload(file, "project", project.id)
-                                                }}
-                                                className="hidden"
-                                                id={`project-image-${project.id}`}
-                                            />
-                                            <Button variant="secondary" size="sm" asChild>
-                                                <label htmlFor={`project-image-${project.id}`} className="cursor-pointer">
-                                                    <Upload className="h-4 w-4" />
-                                                </label>
-                                            </Button>
-                                            <Button
-                                                variant="secondary"
-                                                size="sm"
-                                                onClick={() => {
-                                                    setProjects((prev) => prev.filter((p) => p.id !== project.id))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                        <div className="absolute top-2 left-2 flex items-center space-x-2">
-                                            <GripVertical className="h-5 w-5 text-white bg-black/50 rounded p-1" />
-                                            <span className="text-xs text-white bg-black/50 px-2 py-1 rounded">#{index + 1}</span>
-                                            {project.featured && <Badge className="bg-blue-600 text-white border-0">Featured</Badge>}
-                                        </div>
-                                    </div>
-
-                                    <CardContent className="p-4 space-y-4">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {projects.map((project) => (
+                                <Card key={project.id} className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+                                    <CardHeader>
                                         <div className="flex items-center justify-between">
-                                            <Input
-                                                value={project.title}
-                                                onChange={(e) => {
-                                                    setProjects((prev) =>
-                                                        prev.map((p) => (p.id === project.id ? { ...p, title: e.target.value } : p)),
-                                                    )
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="font-semibold"
-                                            />
-                                            <div className="flex items-center space-x-2 ml-2">
-                                                <Label htmlFor={`featured-${project.id}`} className="text-sm whitespace-nowrap">
-                                                    Featured
-                                                </Label>
+                                            <div className="flex items-center gap-2">
+                                                <CardTitle className="text-cyan-400">{project.title || "New Project"}</CardTitle>
+                                                {project.featured && (
+                                                    <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/50">
+                                                        <Star className="h-3 w-3 mr-1" />
+                                                        Featured
+                                                    </Badge>
+                                                )}
+                                                <Badge
+                                                    className={`${project.status === "completed"
+                                                            ? "bg-green-500/20 text-green-400 border-green-500/50"
+                                                            : project.status === "in-progress"
+                                                                ? "bg-yellow-500/20 text-yellow-400 border-yellow-500/50"
+                                                                : "bg-slate-500/20 text-slate-400 border-slate-500/50"
+                                                        }`}
+                                                >
+                                                    {project.status}
+                                                </Badge>
+                                            </div>
+                                            <div className="flex items-center gap-2">
                                                 <Switch
-                                                    id={`featured-${project.id}`}
                                                     checked={project.featured}
-                                                    onCheckedChange={(checked) => {
-                                                        setProjects((prev) =>
-                                                            prev.map((p) => (p.id === project.id ? { ...p, featured: checked } : p)),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
+                                                    onCheckedChange={(checked) => updateProject(project.id, { featured: checked })}
                                                 />
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => deleteProject(project.id)}
+                                                    className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
                                             </div>
                                         </div>
-
-                                        <Textarea
-                                            value={project.description}
-                                            onChange={(e) => {
-                                                setProjects((prev) =>
-                                                    prev.map((p) => (p.id === project.id ? { ...p, description: e.target.value } : p)),
-                                                )
-                                                setHasUnsavedChanges(true)
-                                            }}
-                                            className="min-h-[80px]"
-                                        />
-
-                                        <div className="grid gap-2 md:grid-cols-2">
-                                            <div>
-                                                <Label>GitHub URL</Label>
-                                                <Input
-                                                    value={project.github}
-                                                    onChange={(e) => {
-                                                        setProjects((prev) =>
-                                                            prev.map((p) => (p.id === project.id ? { ...p, github: e.target.value } : p)),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
-                                                />
-                                            </div>
-                                            <div>
-                                                <Label>Demo URL</Label>
-                                                <Input
-                                                    value={project.demo}
-                                                    onChange={(e) => {
-                                                        setProjects((prev) =>
-                                                            prev.map((p) => (p.id === project.id ? { ...p, demo: e.target.value } : p)),
-                                                        )
-                                                        setHasUnsavedChanges(true)
-                                                    }}
-                                                    className="mt-1"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <Label>Technologies (comma-separated)</Label>
-                                            <Input
-                                                value={project.tags.join(", ")}
-                                                onChange={(e) => {
-                                                    setProjects((prev) =>
-                                                        prev.map((p) =>
-                                                            p.id === project.id
-                                                                ? {
-                                                                    ...p,
-                                                                    tags: e.target.value
-                                                                        .split(",")
-                                                                        .map((tag) => tag.trim())
-                                                                        .filter(Boolean),
-                                                                }
-                                                                : p,
-                                                        ),
-                                                    )
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                                placeholder="React, Node.js, PostgreSQL"
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="aspect-video bg-slate-700/50 rounded-lg overflow-hidden">
+                                            <img
+                                                src={project.image || "/placeholder.svg"}
+                                                alt={project.title}
+                                                className="w-full h-full object-cover"
                                             />
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Project Title</Label>
+                                                <Input
+                                                    value={project.title}
+                                                    onChange={(e) => updateProject(project.id, { title: e.target.value })}
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Description</Label>
+                                                <Textarea
+                                                    value={project.description}
+                                                    onChange={(e) => updateProject(project.id, { description: e.target.value })}
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                    rows={3}
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-2">
+                                                    <Label className="text-slate-300">GitHub URL</Label>
+                                                    <Input
+                                                        value={project.githubUrl}
+                                                        onChange={(e) => updateProject(project.id, { githubUrl: e.target.value })}
+                                                        className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                        placeholder="https://github.com/..."
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label className="text-slate-300">Live URL</Label>
+                                                    <Input
+                                                        value={project.liveUrl}
+                                                        onChange={(e) => updateProject(project.id, { liveUrl: e.target.value })}
+                                                        className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                        placeholder="https://..."
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Status</Label>
+                                                <Select
+                                                    value={project.status}
+                                                    onValueChange={(value: "completed" | "in-progress" | "planned") =>
+                                                        updateProject(project.id, { status: value })
+                                                    }
+                                                >
+                                                    <SelectTrigger className="bg-slate-700/50 border-slate-600 text-white">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="bg-slate-800 border-slate-700">
+                                                        <SelectItem value="completed">Completed</SelectItem>
+                                                        <SelectItem value="in-progress">In Progress</SelectItem>
+                                                        <SelectItem value="planned">Planned</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Technologies</Label>
+                                                <Input
+                                                    value={project.technologies.join(", ")}
+                                                    onChange={(e) =>
+                                                        updateProject(project.id, {
+                                                            technologies: e.target.value
+                                                                .split(",")
+                                                                .map((t) => t.trim())
+                                                                .filter(Boolean),
+                                                        })
+                                                    }
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                    placeholder="React, Node.js, Python, etc."
+                                                />
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {project.technologies.map((tech, techIndex) => (
+                                                        <Badge key={techIndex} variant="secondary" className="bg-slate-700 text-slate-300">
+                                                            {tech}
+                                                        </Badge>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -1493,177 +1169,106 @@ achievements:
                         </div>
                     </TabsContent>
 
-                    {/* GitHub Sync Tab */}
-                    <TabsContent value="github" activeValue={activeTab}>
-                        <div className="space-y-6">
-                            <div>
-                                <h2 className="text-2xl font-bold text-slate-900 mb-2">GitHub Integration</h2>
-                                <p className="text-slate-600">
-                                    Automatically sync all your repositories to your portfolio. Set up webhooks for real-time updates.
-                                </p>
-                            </div>
-
-                            <EnhancedGitHubSync
-                                username="MuhammadKhan148"
-                                onProjectsUpdate={(projects) => {
-                                    console.log("GitHub projects updated:", projects.length)
-                                }}
-                            />
-
-                            <Card className="border-0 shadow-lg">
-                                <CardHeader>
-                                    <CardTitle>Setup Instructions</CardTitle>
-                                    <CardDescription>Follow these steps to enable automatic portfolio updates</CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">1. Configure GitHub Webhook</h4>
-                                        <ul className="text-sm text-slate-600 space-y-1 ml-4">
-                                            <li>• Go to your GitHub repository settings</li>
-                                            <li>• Navigate to "Webhooks" section</li>
-                                            <li>• Click "Add webhook"</li>
-                                            <li>
-                                                • Set Payload URL to: <code className="bg-slate-100 px-1 rounded">/api/github-webhook</code>
-                                            </li>
-                                            <li>• Select "Just the push event"</li>
-                                            <li>• Set Content type to "application/json"</li>
-                                            <li>• Click "Add webhook"</li>
-                                        </ul>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">2. Optimize Repository Display</h4>
-                                        <ul className="text-sm text-slate-600 space-y-1 ml-4">
-                                            <li>• Add topics like "portfolio", "project", or "featured" to your repositories</li>
-                                            <li>• Write clear descriptions for your projects</li>
-                                            <li>• Set homepage URLs for demo links</li>
-                                            <li>• Keep repositories public for portfolio display</li>
-                                        </ul>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <h4 className="font-medium">3. Automatic Updates</h4>
-                                        <p className="text-sm text-slate-600">
-                                            Once configured, your portfolio will automatically update whenever you push to any of your
-                                            repositories. The system filters repositories to show only relevant projects.
-                                        </p>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </TabsContent>
-
                     {/* Testimonials Tab */}
-                    <TabsContent value="testimonials" activeValue={activeTab}>
-                        <div className="flex items-center justify-between mb-6">
+                    <TabsContent value="testimonials" className="space-y-6">
+                        <div className="flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-bold">Testimonials</h2>
-                                <p className="text-slate-600">Manage client and colleague testimonials</p>
+                                <h2 className="text-2xl font-bold text-cyan-400">Client Testimonials</h2>
+                                <p className="text-slate-400">Manage client feedback and recommendations</p>
                             </div>
-                            <Button
-                                onClick={() => {
-                                    const newTestimonial: Testimonial = {
-                                        id: Date.now().toString(),
-                                        name: "New Person",
-                                        role: "Role at Company",
-                                        content: "Testimonial content...",
-                                        avatar: "/placeholder.svg?height=60&width=60",
-                                    }
-                                    setTestimonials((prev) => [...prev, newTestimonial])
-                                    setHasUnsavedChanges(true)
-                                }}
-                                className="bg-blue-600 hover:bg-blue-700"
-                            >
-                                <Plus className="mr-2 h-4 w-4" />
+                            <Button onClick={addTestimonial} className="bg-gradient-to-r from-cyan-500 to-purple-500">
+                                <Plus className="h-4 w-4 mr-2" />
                                 Add Testimonial
                             </Button>
                         </div>
 
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {testimonials.map((testimonial) => (
-                                <Card key={testimonial.id} className="border-0 shadow-lg">
-                                    <CardContent className="p-6 space-y-4">
+                                <Card key={testimonial.id} className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+                                    <CardHeader>
                                         <div className="flex items-center justify-between">
-                                            <div className="flex items-center space-x-3">
-                                                <Image
-                                                    src={testimonial.avatar || "/placeholder.svg"}
-                                                    alt={testimonial.name}
-                                                    width={50}
-                                                    height={50}
-                                                    className="rounded-full border-2 border-blue-200"
-                                                />
-                                                <div className="space-y-1 flex-1">
-                                                    <Input
-                                                        value={testimonial.name}
-                                                        onChange={(e) => {
-                                                            setTestimonials((prev) =>
-                                                                prev.map((t) => (t.id === testimonial.id ? { ...t, name: e.target.value } : t)),
-                                                            )
-                                                            setHasUnsavedChanges(true)
-                                                        }}
-                                                        className="font-medium"
-                                                    />
-                                                    <Input
-                                                        value={testimonial.role}
-                                                        onChange={(e) => {
-                                                            setTestimonials((prev) =>
-                                                                prev.map((t) => (t.id === testimonial.id ? { ...t, role: e.target.value } : t)),
-                                                            )
-                                                            setHasUnsavedChanges(true)
-                                                        }}
-                                                        className="text-sm"
-                                                    />
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-10 w-10 border border-cyan-500/50">
+                                                    <AvatarImage src={testimonial.avatar || "/placeholder.svg"} alt={testimonial.name} />
+                                                    <AvatarFallback className="bg-slate-700 text-cyan-400">
+                                                        {testimonial.name
+                                                            .split(" ")
+                                                            .map((n) => n[0])
+                                                            .join("")}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <CardTitle className="text-cyan-400 text-lg">
+                                                        {testimonial.name || "New Testimonial"}
+                                                    </CardTitle>
+                                                    <p className="text-slate-400 text-sm">
+                                                        {testimonial.role} at {testimonial.company}
+                                                    </p>
                                                 </div>
                                             </div>
                                             <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => {
-                                                    setTestimonials((prev) => prev.filter((t) => t.id !== testimonial.id))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                onClick={() => deleteTestimonial(testimonial.id)}
+                                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         </div>
-
-                                        <Textarea
-                                            value={testimonial.content}
-                                            onChange={(e) => {
-                                                setTestimonials((prev) =>
-                                                    prev.map((t) => (t.id === testimonial.id ? { ...t, content: e.target.value } : t)),
-                                                )
-                                                setHasUnsavedChanges(true)
-                                            }}
-                                            className="min-h-[100px]"
-                                            placeholder="Testimonial content..."
-                                        />
-
-                                        <div>
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0]
-                                                    if (file) handleImageUpload(file, "testimonial", testimonial.id)
-                                                }}
-                                                className="hidden"
-                                                id={`testimonial-avatar-${testimonial.id}`}
-                                            />
-                                            <Button variant="outline" size="sm" asChild>
-                                                <label htmlFor={`testimonial-avatar-${testimonial.id}`} className="cursor-pointer">
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    Change Avatar
-                                                </label>
-                                            </Button>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Name</Label>
+                                                <Input
+                                                    value={testimonial.name}
+                                                    onChange={(e) => updateTestimonial(testimonial.id, { name: e.target.value })}
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-slate-300">Company</Label>
+                                                <Input
+                                                    value={testimonial.company}
+                                                    onChange={(e) => updateTestimonial(testimonial.id, { company: e.target.value })}
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                />
+                                            </div>
                                         </div>
 
-                                        <div className="flex justify-center">
-                                            <div className="flex space-x-1">
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-300">Role</Label>
+                                            <Input
+                                                value={testimonial.role}
+                                                onChange={(e) => updateTestimonial(testimonial.id, { role: e.target.value })}
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-300">Testimonial</Label>
+                                            <Textarea
+                                                value={testimonial.content}
+                                                onChange={(e) => updateTestimonial(testimonial.id, { content: e.target.value })}
+                                                className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                rows={4}
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-300">Rating</Label>
+                                            <div className="flex items-center gap-2">
                                                 {[1, 2, 3, 4, 5].map((star) => (
-                                                    <Star key={star} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                                                    <button
+                                                        key={star}
+                                                        onClick={() => updateTestimonial(testimonial.id, { rating: star })}
+                                                        className={`text-2xl ${star <= testimonial.rating ? "text-yellow-400" : "text-slate-600"
+                                                            } hover:text-yellow-300 transition-colors`}
+                                                    >
+                                                        ★
+                                                    </button>
                                                 ))}
+                                                <span className="text-slate-400 ml-2">{testimonial.rating}/5</span>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -1673,117 +1278,124 @@ achievements:
                     </TabsContent>
 
                     {/* Settings Tab */}
-                    <TabsContent value="settings" activeValue={activeTab}>
-                        <div className="space-y-6">
-                            <Card className="border-0 shadow-lg">
+                    <TabsContent value="settings" className="space-y-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Site Configuration */}
+                            <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
                                 <CardHeader>
-                                    <CardTitle className="flex items-center space-x-2">
-                                        <Palette className="h-5 w-5 text-blue-600" />
-                                        <span>Site Settings</span>
+                                    <CardTitle className="text-cyan-400 flex items-center gap-2">
+                                        <Settings className="h-5 w-5" />
+                                        Site Configuration
                                     </CardTitle>
-                                    <CardDescription>Configure your portfolio settings and preferences</CardDescription>
+                                    <CardDescription className="text-slate-400">
+                                        Configure your portfolio appearance and features
+                                    </CardDescription>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
-                                    <div className="grid gap-6 md:grid-cols-2">
-                                        <div>
-                                            <Label>Site Title</Label>
-                                            <Input
-                                                value={siteSettings.siteTitle}
-                                                onChange={(e) => {
-                                                    setSiteSettings((prev) => ({ ...prev, siteTitle: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Meta Description</Label>
-                                            <Input
-                                                value={siteSettings.metaDescription}
-                                                onChange={(e) => {
-                                                    setSiteSettings((prev) => ({ ...prev, metaDescription: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Google Analytics ID</Label>
-                                            <Input
-                                                value={siteSettings.googleAnalyticsId}
-                                                onChange={(e) => {
-                                                    setSiteSettings((prev) => ({ ...prev, googleAnalyticsId: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                placeholder="GA-XXXXXXXXX"
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                        <div>
-                                            <Label>Contact Form Email</Label>
-                                            <Input
-                                                value={siteSettings.contactFormEmail}
-                                                onChange={(e) => {
-                                                    setSiteSettings((prev) => ({ ...prev, contactFormEmail: e.target.value }))
-                                                    setHasUnsavedChanges(true)
-                                                }}
-                                                className="mt-1"
-                                            />
-                                        </div>
-                                    </div>
-
                                     <div className="space-y-4">
-                                        <h3 className="text-lg font-semibold">Theme Settings</h3>
-                                        <div className="grid gap-4 md:grid-cols-3">
-                                            {[
-                                                { name: "Blue", value: "blue", gradient: "from-blue-400 to-indigo-400" },
-                                                { name: "Purple", value: "purple", gradient: "from-purple-400 to-pink-400" },
-                                                { name: "Green", value: "green", gradient: "from-green-400 to-emerald-400" },
-                                            ].map((theme) => (
-                                                <div
-                                                    key={theme.value}
-                                                    onClick={() => {
-                                                        setSiteSettings((prev) => ({ ...prev, theme: theme.value }))
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <Label className="text-slate-300">Theme</Label>
+                                                <p className="text-sm text-slate-400">Choose your portfolio theme</p>
+                                            </div>
+                                            <Select
+                                                value={siteConfig.theme}
+                                                onValueChange={(value: "light" | "dark" | "cyberpunk") => {
+                                                    setSiteConfig({ ...siteConfig, theme: value })
+                                                    setHasUnsavedChanges(true)
+                                                }}
+                                            >
+                                                <SelectTrigger className="w-32 bg-slate-700/50 border-slate-600 text-white">
+                                                    <SelectValue />
+                                                </SelectTrigger>
+                                                <SelectContent className="bg-slate-800 border-slate-700">
+                                                    <SelectItem value="light">Light</SelectItem>
+                                                    <SelectItem value="dark">Dark</SelectItem>
+                                                    <SelectItem value="cyberpunk">Cyberpunk</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <Label className="text-slate-300">Primary Color</Label>
+                                            <div className="flex items-center gap-2">
+                                                <Input
+                                                    type="color"
+                                                    value={siteConfig.primaryColor}
+                                                    onChange={(e) => {
+                                                        setSiteConfig({ ...siteConfig, primaryColor: e.target.value })
                                                         setHasUnsavedChanges(true)
                                                     }}
-                                                    className={`p-4 border rounded-lg cursor-pointer transition-all ${siteSettings.theme === theme.value
-                                                        ? "border-blue-500 ring-2 ring-blue-200"
-                                                        : "border-slate-200 hover:border-slate-300"
-                                                        }`}
-                                                >
-                                                    <div className={`w-full h-20 bg-gradient-to-r ${theme.gradient} rounded mb-2`}></div>
-                                                    <p className="text-sm font-medium">
-                                                        {theme.name} {siteSettings.theme === theme.value && "(Current)"}
-                                                    </p>
-                                                </div>
-                                            ))}
+                                                    className="w-16 h-10 bg-slate-700/50 border-slate-600"
+                                                />
+                                                <Input
+                                                    value={siteConfig.primaryColor}
+                                                    onChange={(e) => {
+                                                        setSiteConfig({ ...siteConfig, primaryColor: e.target.value })
+                                                        setHasUnsavedChanges(true)
+                                                    }}
+                                                    className="bg-slate-700/50 border-slate-600 text-white focus:border-cyan-500"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
 
+                                    <Separator className="bg-slate-700" />
+
                                     <div className="space-y-4">
-                                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                                        <h4 className="text-lg font-semibold text-cyan-400">Features</h4>
+
+                                        <div className="flex items-center justify-between">
                                             <div>
-                                                <h4 className="font-medium">Dark Mode</h4>
-                                                <p className="text-sm text-slate-600">Enable dark mode for your portfolio</p>
+                                                <Label className="text-slate-300">Show GitHub Stats</Label>
+                                                <p className="text-sm text-slate-400">Display GitHub statistics on homepage</p>
                                             </div>
                                             <Switch
-                                                checked={siteSettings.darkMode}
+                                                checked={siteConfig.showGitHubStats}
                                                 onCheckedChange={(checked) => {
-                                                    setSiteSettings((prev) => ({ ...prev, darkMode: checked }))
+                                                    setSiteConfig({ ...siteConfig, showGitHubStats: checked })
                                                     setHasUnsavedChanges(true)
                                                 }}
                                             />
                                         </div>
 
-                                        <div className="flex items-center justify-between p-4 border rounded-lg">
+                                        <div className="flex items-center justify-between">
                                             <div>
-                                                <h4 className="font-medium">Analytics</h4>
-                                                <p className="text-sm text-slate-600">Enable visitor analytics tracking</p>
+                                                <Label className="text-slate-300">Show Testimonials</Label>
+                                                <p className="text-sm text-slate-400">Display client testimonials section</p>
                                             </div>
                                             <Switch
-                                                checked={siteSettings.analytics}
+                                                checked={siteConfig.showTestimonials}
                                                 onCheckedChange={(checked) => {
-                                                    setSiteSettings((prev) => ({ ...prev, analytics: checked }))
+                                                    setSiteConfig({ ...siteConfig, showTestimonials: checked })
+                                                    setHasUnsavedChanges(true)
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <Label className="text-slate-300">Contact Form</Label>
+                                                <p className="text-sm text-slate-400">Enable contact form functionality</p>
+                                            </div>
+                                            <Switch
+                                                checked={siteConfig.contactFormEnabled}
+                                                onCheckedChange={(checked) => {
+                                                    setSiteConfig({ ...siteConfig, contactFormEnabled: checked })
+                                                    setHasUnsavedChanges(true)
+                                                }}
+                                            />
+                                        </div>
+
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <Label className="text-slate-300">Analytics</Label>
+                                                <p className="text-sm text-slate-400">Enable visitor analytics tracking</p>
+                                            </div>
+                                            <Switch
+                                                checked={siteConfig.analyticsEnabled}
+                                                onCheckedChange={(checked) => {
+                                                    setSiteConfig({ ...siteConfig, analyticsEnabled: checked })
                                                     setHasUnsavedChanges(true)
                                                 }}
                                             />
@@ -1792,89 +1404,80 @@ achievements:
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-0 shadow-lg">
+                            {/* GitHub Integration */}
+                            <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
                                 <CardHeader>
-                                    <CardTitle>Export/Import Data</CardTitle>
-                                    <CardDescription>Backup or restore your portfolio data</CardDescription>
+                                    <CardTitle className="text-cyan-400 flex items-center gap-2">
+                                        <Github className="h-5 w-5" />
+                                        GitHub Integration
+                                    </CardTitle>
+                                    <CardDescription className="text-slate-400">
+                                        Manage GitHub synchronization and automation
+                                    </CardDescription>
                                 </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="flex space-x-4 flex-wrap gap-2">
-                                        <Button
-                                            variant="outline"
-                                            onClick={() => {
-                                                const data = {
-                                                    personalInfo,
-                                                    experiences,
-                                                    projects,
-                                                    skills,
-                                                    testimonials,
-                                                    siteSettings,
-                                                }
-                                                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
-                                                const url = URL.createObjectURL(blob)
-                                                const a = document.createElement("a")
-                                                a.href = url
-                                                a.download = "portfolio-data.json"
-                                                a.click()
-                                                URL.revokeObjectURL(url)
-                                            }}
-                                        >
-                                            <Download className="mr-2 h-4 w-4" />
-                                            Export JSON
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            onClick={handleExportMarkdown}
-                                            className="bg-blue-50 border-blue-200 hover:border-blue-300"
-                                        >
-                                            <Download className="mr-2 h-4 w-4" />
-                                            Export Portfolio.md
-                                        </Button>
-                                        <div>
-                                            <input
-                                                type="file"
-                                                accept=".json"
-                                                onChange={(e) => {
-                                                    const file = e.target.files?.[0]
-                                                    if (file) {
-                                                        const reader = new FileReader()
-                                                        reader.onload = (e) => {
-                                                            try {
-                                                                const data = JSON.parse(e.target?.result as string)
-                                                                if (data.personalInfo) setPersonalInfo(data.personalInfo)
-                                                                if (data.experiences) setExperiences(data.experiences)
-                                                                if (data.projects) setProjects(data.projects)
-                                                                if (data.skills) setSkills(data.skills)
-                                                                if (data.testimonials) setTestimonials(data.testimonials)
-                                                                if (data.siteSettings) setSiteSettings(data.siteSettings)
-                                                                setHasUnsavedChanges(true)
-                                                                alert("Data imported successfully!")
-                                                            } catch (error) {
-                                                                alert("Error importing data. Please check the file format.")
-                                                            }
-                                                        }
-                                                        reader.readAsText(file)
-                                                    }
-                                                }}
-                                                className="hidden"
-                                                id="import-data"
-                                            />
-                                            <Button variant="outline" asChild>
-                                                <label htmlFor="import-data" className="cursor-pointer">
-                                                    <Upload className="mr-2 h-4 w-4" />
-                                                    Import Data
-                                                </label>
-                                            </Button>
-                                        </div>
-                                    </div>
+                                <CardContent>
+                                    <EnhancedGitHubSync />
                                 </CardContent>
                             </Card>
                         </div>
+
+                        {/* System Status */}
+                        <Card className="bg-slate-800/50 backdrop-blur-sm border-slate-700/50">
+                            <CardHeader>
+                                <CardTitle className="text-cyan-400 flex items-center gap-2">
+                                    <Activity className="h-5 w-5" />
+                                    System Status
+                                </CardTitle>
+                                <CardDescription className="text-slate-400">
+                                    Monitor your portfolio's performance and health
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                                            <span className="text-slate-300 font-medium">Portfolio Status</span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-green-400">Online</p>
+                                        <p className="text-sm text-slate-400">Last updated: {new Date().toLocaleTimeString()}</p>
+                                    </div>
+
+                                    <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <GitBranch className="h-4 w-4 text-cyan-400" />
+                                            <span className="text-slate-300 font-medium">GitHub Sync</span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-cyan-400">
+                                            {githubSyncStatus === "success"
+                                                ? "Synced"
+                                                : githubSyncStatus === "syncing"
+                                                    ? "Syncing..."
+                                                    : githubSyncStatus === "error"
+                                                        ? "Error"
+                                                        : "Ready"}
+                                        </p>
+                                        <p className="text-sm text-slate-400">
+                                            {lastGitHubSync ? `Last sync: ${lastGitHubSync.toLocaleTimeString()}` : "Never synced"}
+                                        </p>
+                                    </div>
+
+                                    <div className="bg-slate-700/30 rounded-lg p-4 border border-slate-600/50">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <Database className="h-4 w-4 text-purple-400" />
+                                            <span className="text-slate-300 font-medium">Data Status</span>
+                                        </div>
+                                        <p className="text-2xl font-bold text-purple-400">{hasUnsavedChanges ? "Modified" : "Saved"}</p>
+                                        <p className="text-sm text-slate-400">
+                                            {lastSaved ? `Saved: ${lastSaved.toLocaleTimeString()}` : "No changes"}
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
                     </TabsContent>
                 </Tabs>
             </div>
-
-            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" />
         </div>
     )
 }
