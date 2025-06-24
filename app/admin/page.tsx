@@ -31,9 +31,11 @@ import {
     Monitor,
     Edit3,
     Lock,
+    Github,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { EnhancedGitHubSync } from "@/components/enhanced-github-sync"
 
 // Types
 interface PersonalInfo {
@@ -958,7 +960,7 @@ achievements:
 
             <div className="container py-8 px-4">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-                    <TabsList className="grid w-full grid-cols-6 lg:w-fit">
+                    <TabsList className="grid w-full grid-cols-6 lg:grid-cols-7 lg:w-fit">
                         <TabsTrigger value="personal" isActive={activeTab === "personal"} onClick={setActiveTab}>
                             <User className="h-4 w-4 mr-2" />
                             <span className="hidden sm:inline">Personal</span>
@@ -974,6 +976,10 @@ achievements:
                         <TabsTrigger value="projects" isActive={activeTab === "projects"} onClick={setActiveTab}>
                             <FolderOpen className="h-4 w-4 mr-2" />
                             <span className="hidden sm:inline">Projects</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="github" isActive={activeTab === "github"} onClick={setActiveTab}>
+                            <Github className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">GitHub</span>
                         </TabsTrigger>
                         <TabsTrigger value="testimonials" isActive={activeTab === "testimonials"} onClick={setActiveTab}>
                             <MessageSquare className="h-4 w-4 mr-2" />
@@ -1637,6 +1643,66 @@ achievements:
                                     </CardContent>
                                 </Card>
                             ))}
+                        </div>
+                    </TabsContent>
+
+                    {/* GitHub Sync Tab */}
+                    <TabsContent value="github" activeValue={activeTab}>
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-2xl font-bold text-slate-900 mb-2">GitHub Integration</h2>
+                                <p className="text-slate-600">
+                                    Automatically sync all your repositories to your portfolio. Set up webhooks for real-time updates.
+                                </p>
+                            </div>
+
+                            <EnhancedGitHubSync
+                                username="MuhammadKhan148"
+                                onProjectsUpdate={(projects) => {
+                                    console.log('GitHub projects updated:', projects.length)
+                                }}
+                            />
+
+                            <Card className="border-0 shadow-lg">
+                                <CardHeader>
+                                    <CardTitle>Setup Instructions</CardTitle>
+                                    <CardDescription>
+                                        Follow these steps to enable automatic portfolio updates
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-4">
+                                    <div className="space-y-2">
+                                        <h4 className="font-medium">1. Configure GitHub Webhook</h4>
+                                        <ul className="text-sm text-slate-600 space-y-1 ml-4">
+                                            <li>• Go to your GitHub repository settings</li>
+                                            <li>• Navigate to "Webhooks" section</li>
+                                            <li>• Click "Add webhook"</li>
+                                            <li>• Set Payload URL to: <code className="bg-slate-100 px-1 rounded">/api/github-webhook</code></li>
+                                            <li>• Select "Just the push event"</li>
+                                            <li>• Set Content type to "application/json"</li>
+                                            <li>• Click "Add webhook"</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <h4 className="font-medium">2. Optimize Repository Display</h4>
+                                        <ul className="text-sm text-slate-600 space-y-1 ml-4">
+                                            <li>• Add topics like "portfolio", "project", or "featured" to your repositories</li>
+                                            <li>• Write clear descriptions for your projects</li>
+                                            <li>• Set homepage URLs for demo links</li>
+                                            <li>• Keep repositories public for portfolio display</li>
+                                        </ul>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <h4 className="font-medium">3. Automatic Updates</h4>
+                                        <p className="text-sm text-slate-600">
+                                            Once configured, your portfolio will automatically update whenever you push to any of your repositories.
+                                            The system filters repositories to show only relevant projects.
+                                        </p>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                     </TabsContent>
 

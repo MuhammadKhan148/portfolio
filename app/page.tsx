@@ -47,9 +47,26 @@ export default function Portfolio() {
 
   const loadGitHubProjects = async () => {
     setIsLoadingProjects(true)
-    const projects = await fetchGitHubProjects()
-    setGitHubProjects(projects)
-    setIsLoadingProjects(false)
+    try {
+      // First try to load from cached JSON files
+      const cachedProjectsResponse = await fetch('/content/github-projects.json').catch(() => null)
+      if (cachedProjectsResponse?.ok) {
+        const projects = await cachedProjectsResponse.json()
+        setGitHubProjects(projects)
+        setIsLoadingProjects(false)
+        return
+      }
+
+      // Fallback to API call
+      const projects = await fetchGitHubProjects()
+      setGitHubProjects(projects)
+    } catch (error) {
+      console.error('Error loading GitHub projects:', error)
+      // Use fallback projects
+      setGitHubProjects([])
+    } finally {
+      setIsLoadingProjects(false)
+    }
   }
 
   // Structured data for SEO

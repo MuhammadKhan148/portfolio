@@ -14,6 +14,12 @@
 [dev]
   framework = "#auto"
 
+# GitHub webhook handling
+[[redirects]]
+  from = "/api/github-webhook"
+  to = "/.netlify/functions/github-webhook"
+  status = 200
+
 # Protected admin routes - require authentication
 [[redirects]]
   from = "/admin/*"
