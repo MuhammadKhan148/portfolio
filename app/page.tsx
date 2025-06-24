@@ -113,26 +113,26 @@ export default function Portfolio() {
           return (
             !repo.fork &&
             !repo.private &&
-            repo.description &&
             !repo.name.includes(".github") &&
             !repo.name.includes("config") &&
+            !repo.name.toLowerCase().includes("test") &&
+            repo.name !== "MuhammadKhan148" &&
             repo.stargazers_count >= 0 &&
-            (repo.topics?.includes("portfolio") ||
-              repo.topics?.includes("project") ||
+            // Much more inclusive filtering - show most repositories
+            (repo.description ||
               repo.language ||
-              repo.description.toLowerCase().includes("project") ||
-              repo.description.toLowerCase().includes("app") ||
-              repo.description.toLowerCase().includes("website"))
+              repo.topics?.length > 0 ||
+              repo.size > 100) // Include repos with some content
           )
         })
-        .slice(0, 6)
+        .slice(0, 12) // Show more projects (increased from 6 to 12)
         .map((repo: any) => ({
           id: repo.id.toString(),
           title: repo.name
             .split("-")
             .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" "),
-          description: repo.description || "A GitHub project",
+          description: repo.description || `${repo.language || 'Code'} project - ${repo.name}`,
           image: `https://opengraph.githubassets.com/1/${repo.full_name}`,
           tags: [...(repo.language ? [repo.language] : []), ...(repo.topics?.slice(0, 4) || [])].filter(Boolean),
           github: repo.html_url,
@@ -564,22 +564,22 @@ export default function Portfolio() {
                 <CardHeader className="text-center pb-4">
                   <div
                     className={`relative mx-auto mb-4 p-4 rounded-2xl bg-gradient-to-br ${category.color === "emerald"
-                        ? "from-emerald-100 to-emerald-200"
-                        : category.color === "teal"
-                          ? "from-teal-100 to-teal-200"
-                          : category.color === "purple"
-                            ? "from-purple-100 to-purple-200"
-                            : "from-pink-100 to-pink-200"
+                      ? "from-emerald-100 to-emerald-200"
+                      : category.color === "teal"
+                        ? "from-teal-100 to-teal-200"
+                        : category.color === "purple"
+                          ? "from-purple-100 to-purple-200"
+                          : "from-pink-100 to-pink-200"
                       } group-hover:scale-110 transition-transform duration-300`}
                   >
                     <category.icon
                       className={`h-8 w-8 ${category.color === "emerald"
-                          ? "text-emerald-600"
-                          : category.color === "teal"
-                            ? "text-teal-600"
-                            : category.color === "purple"
-                              ? "text-purple-600"
-                              : "text-pink-600"
+                        ? "text-emerald-600"
+                        : category.color === "teal"
+                          ? "text-teal-600"
+                          : category.color === "purple"
+                            ? "text-purple-600"
+                            : "text-pink-600"
                         }`}
                     />
                   </div>
@@ -596,12 +596,12 @@ export default function Portfolio() {
                         <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
                           <div
                             className={`h-2 rounded-full bg-gradient-to-r ${category.color === "emerald"
-                                ? "from-emerald-500 to-emerald-600"
-                                : category.color === "teal"
-                                  ? "from-teal-500 to-teal-600"
-                                  : category.color === "purple"
-                                    ? "from-purple-500 to-purple-600"
-                                    : "from-pink-500 to-pink-600"
+                              ? "from-emerald-500 to-emerald-600"
+                              : category.color === "teal"
+                                ? "from-teal-500 to-teal-600"
+                                : category.color === "purple"
+                                  ? "from-purple-500 to-purple-600"
+                                  : "from-pink-500 to-pink-600"
                               } transition-all duration-1000 ease-out`}
                             style={{
                               width: visibleSections.has("skills") ? `${skill.level}%` : "0%",
