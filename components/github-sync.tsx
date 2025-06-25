@@ -55,20 +55,24 @@ export function GitHubSync({ username, onProjectsUpdate }: GitHubSyncProps) {
 
             const allRepos: GitHubRepo[] = await response.json()
 
-            // Filter repositories for portfolio display
+            // Filter repositories for portfolio display (more inclusive)
             const portfolioRepos = allRepos.filter(repo => {
-                return !repo.fork && // Not a fork
-                    !repo.private && // Public repos only
-                    repo.description && // Has description
-                    !repo.name.includes('.github') && // Not meta repos
-                    !repo.name.includes('config') && // Not config repos
-                    (repo.topics?.includes('portfolio') ||
-                        repo.topics?.includes('project') ||
-                        repo.language ||
-                        repo.stargazers_count > 0 ||
-                        repo.description.toLowerCase().includes('project') ||
-                        repo.description.toLowerCase().includes('app') ||
-                        repo.description.toLowerCase().includes('website'))
+                // Exclude these types of repos
+                if (repo.fork) return false // Not a fork
+                if (repo.private) return false // Public repos only
+                if (repo.name.includes('.github')) return false // Not meta repos
+                if (repo.name.toLowerCase().includes('dotfiles')) return false // Not dotfiles
+                if (repo.name.toLowerCase() === 'muhammadkhan148') return false // Not profile repo
+
+                // Include most repositories with these conditions:
+                return (
+                    repo.language || // Has a programming language
+                    repo.description || // Has any description
+                    repo.stargazers_count > 0 || // Has stars
+                    repo.forks_count > 0 || // Has forks
+                    repo.topics?.length > 0 || // Has topics
+                    repo.pushed_at // Recently active (all repos should have this)
+                )
             })
 
             setRepos(portfolioRepos)
@@ -76,7 +80,7 @@ export function GitHubSync({ username, onProjectsUpdate }: GitHubSyncProps) {
 
             // Transform for portfolio display
             const portfolioProjects = portfolioRepos
-                .slice(0, 6) // Show top 6 projects
+                .slice(0, 12) // Show top 12 projects
                 .map(repo => ({
                     id: repo.id.toString(),
                     title: repo.name

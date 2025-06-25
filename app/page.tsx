@@ -164,6 +164,7 @@ export default function UltimatePortfolio() {
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
 
   const cursorRef = useRef<HTMLDivElement>(null)
+  const trailRef = useRef<HTMLDivElement[]>([])
   const magneticRefs = useRef<HTMLElement[]>([])
 
   // Intersection observer refs
@@ -221,22 +222,24 @@ export default function UltimatePortfolio() {
 
       const portfolioProjects = repos
         .filter((repo: any) => {
+          // More inclusive filtering - exclude only unwanted repos
+          if (repo.fork) return false
+          if (repo.private) return false
+          if (repo.name.includes(".github")) return false
+          if (repo.name.toLowerCase().includes("dotfiles")) return false
+          if (repo.name.toLowerCase() === "muhammadkhan148") return false
+
+          // Include most repos that have any activity or content
           return (
-            !repo.fork &&
-            !repo.private &&
-            repo.description &&
-            !repo.name.includes(".github") &&
-            !repo.name.includes("config") &&
-            repo.stargazers_count >= 0 &&
-            (repo.topics?.includes("portfolio") ||
-              repo.topics?.includes("project") ||
-              repo.language ||
-              repo.description.toLowerCase().includes("project") ||
-              repo.description.toLowerCase().includes("app") ||
-              repo.description.toLowerCase().includes("website"))
+            repo.language ||
+            repo.description ||
+            repo.stargazers_count > 0 ||
+            repo.forks_count > 0 ||
+            repo.topics?.length > 0 ||
+            repo.pushed_at
           )
         })
-        .slice(0, 6)
+        .slice(0, 12)
         .map((repo: any) => ({
           id: repo.id.toString(),
           title: repo.name.replace(/-/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -262,6 +265,22 @@ export default function UltimatePortfolio() {
     const y = e.clientY
 
     setMousePosition({ x, y })
+
+    // Update cursor position
+    if (cursorRef.current) {
+      cursorRef.current.style.left = `${x}px`
+      cursorRef.current.style.top = `${y}px`
+    }
+
+    // Cursor trail effect
+    trailRef.current.forEach((trail, index) => {
+      if (trail) {
+        setTimeout(() => {
+          trail.style.left = `${x}px`
+          trail.style.top = `${y}px`
+        }, index * 50)
+      }
+    })
 
     // Magnetic effect for buttons
     magneticRefs.current.forEach((el) => {
@@ -321,6 +340,54 @@ export default function UltimatePortfolio() {
     <div
       className={`min-h-screen transition-colors duration-500 ${isDark ? "bg-slate-950 text-white" : "bg-white text-slate-900"}`}
     >
+      {/* Custom Cursor with Trail */}
+      <div
+        ref={cursorRef}
+        className={`fixed w-4 h-4 pointer-events-none z-50 mix-blend-difference transition-all duration-100 ${cursorVariant === "hover"
+          ? "scale-150 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+          : cursorVariant === "click"
+            ? "scale-75 bg-red-400 rounded-full"
+            : "scale-100 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
+          }`}
+        style={{ transform: 'translate(-50%, -50%)' }}
+      />
+
+      {/* Cursor Trail */}
+      {[...Array(5)].map((_, i) => (
+        <div
+          key={i}
+          ref={el => { if (el) trailRef.current[i] = el }}
+          className="fixed w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-40 opacity-50"
+          style={{
+            transform: 'translate(-50%, -50%)',
+            transition: `all ${(i + 1) * 100}ms ease-out`
+          }}
+        />
+      ))}
+
+      {/* Floating Interactive Elements */}
+      <div className="fixed inset-0 pointer-events-none">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute animate-float-complex opacity-40"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${20 + Math.random() * 10}s`,
+            }}
+          >
+            <div
+              className={`w-6 h-6 rounded-full blur-sm ${i % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-cyan-400' :
+                i % 4 === 1 ? 'bg-gradient-to-r from-purple-400 to-pink-400' :
+                  i % 4 === 2 ? 'bg-gradient-to-r from-pink-400 to-red-400' :
+                    'bg-gradient-to-r from-yellow-400 to-orange-400'
+                }`}
+            />
+          </div>
+        ))}
+      </div>
 
 
       {/* Enhanced Background */}
@@ -336,8 +403,14 @@ export default function UltimatePortfolio() {
           }}
         />
 
+        {/* Animated dot pattern */}
+        <div className="absolute inset-0 opacity-30" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23ffffff' fillOpacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          animation: 'drift 30s ease-in-out infinite'
+        }} />
+
         {/* Floating particles with better performance */}
-        {[...Array(6)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <div
             key={i}
             className="absolute animate-float-optimized opacity-20"
@@ -1149,7 +1222,7 @@ export default function UltimatePortfolio() {
       >
         <div className="max-w-7xl mx-auto text-center">
           <p className={isDark ? "text-slate-400" : "text-slate-600"}>
-            © 2024 Alex Rivera. Crafted with passion and precision. All rights reserved.
+            © 2024 {portfolioData.name}. Crafted with passion and precision. All rights reserved.
           </p>
         </div>
       </footer>
