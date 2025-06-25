@@ -210,7 +210,7 @@ export default function UltimatePortfolio() {
 
   const fetchGitHubProjects = async () => {
     try {
-      const response = await fetch("https://api.github.com/users/MuhammadKhan148/repos?sort=updated&per_page=50", {
+      const response = await fetch("https://api.github.com/users/MuhammadKhan148/repos?sort=updated&per_page=100", {
         headers: {
           Accept: "application/vnd.github.v3+json",
         },
@@ -222,28 +222,27 @@ export default function UltimatePortfolio() {
 
       const portfolioProjects = repos
         .filter((repo: any) => {
-          // More inclusive filtering - exclude only unwanted repos
+          // More inclusive filtering - show more repos
           if (repo.fork) return false
           if (repo.private) return false
           if (repo.name.includes(".github")) return false
           if (repo.name.toLowerCase().includes("dotfiles")) return false
           if (repo.name.toLowerCase() === "muhammadkhan148") return false
 
-          // Include most repos that have any activity or content
-          return (
-            repo.language ||
-            repo.description ||
-            repo.stargazers_count > 0 ||
-            repo.forks_count > 0 ||
-            repo.topics?.length > 0 ||
-            repo.pushed_at
-          )
+          // Include all repos with any activity, content, or recent updates
+          return true // Show all non-excluded repos
         })
-        .slice(0, 12)
+        .sort((a: any, b: any) => {
+          // Sort by a combination of stars, recent activity, and creation date
+          const scoreA = (a.stargazers_count || 0) * 3 + (a.forks_count || 0) * 2 + (new Date(a.pushed_at).getTime() / 1000000000)
+          const scoreB = (b.stargazers_count || 0) * 3 + (b.forks_count || 0) * 2 + (new Date(b.pushed_at).getTime() / 1000000000)
+          return scoreB - scoreA
+        })
+        .slice(0, 18) // Show more projects (increased from 12 to 18)
         .map((repo: any) => ({
           id: repo.id.toString(),
           title: repo.name.replace(/-/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
-          description: repo.description,
+          description: repo.description || "No description available",
           image: `/placeholder.svg?height=400&width=600`,
           tech: [repo.language, ...(repo.topics || [])].filter(Boolean).slice(0, 4),
           github: repo.html_url,
@@ -367,19 +366,19 @@ export default function UltimatePortfolio() {
 
       {/* Floating Interactive Elements */}
       <div className="fixed inset-0 pointer-events-none">
-        {[...Array(12)].map((_, i) => (
+        {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className="absolute animate-float-complex opacity-40"
+            className="absolute animate-float-complex opacity-30"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${20 + Math.random() * 10}s`,
+              animationDelay: `${Math.random() * 15}s`,
+              animationDuration: `${40 + Math.random() * 20}s`,
             }}
           >
             <div
-              className={`w-6 h-6 rounded-full blur-sm ${i % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-cyan-400' :
+              className={`w-4 h-4 rounded-full blur-sm ${i % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-cyan-400' :
                 i % 4 === 1 ? 'bg-gradient-to-r from-purple-400 to-pink-400' :
                   i % 4 === 2 ? 'bg-gradient-to-r from-pink-400 to-red-400' :
                     'bg-gradient-to-r from-yellow-400 to-orange-400'
@@ -399,40 +398,40 @@ export default function UltimatePortfolio() {
             : "bg-gradient-to-br from-blue-100/40 via-purple-100/40 to-pink-100/40"
             }`}
           style={{
-            transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`,
+            transform: `translate(${mousePosition.x * 0.003}px, ${mousePosition.y * 0.003}px)`,
           }}
         />
 
         {/* Animated dot pattern */}
         <div className="absolute inset-0 opacity-30" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23ffffff' fillOpacity='0.03'%3E%3Ccircle cx='30' cy='30' r='1'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          animation: 'drift 30s ease-in-out infinite'
+          animation: 'drift 60s ease-in-out infinite'
         }} />
 
         {/* Floating particles with better performance */}
-        {[...Array(8)].map((_, i) => (
+        {[...Array(6)].map((_, i) => (
           <div
             key={i}
-            className="absolute animate-float-optimized opacity-20"
+            className="absolute animate-float-optimized opacity-15"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 10}s`,
-              animationDuration: `${20 + Math.random() * 10}s`,
+              animationDelay: `${Math.random() * 20}s`,
+              animationDuration: `${50 + Math.random() * 30}s`,
             }}
           >
             <div
-              className={`w-32 h-32 rounded-full blur-xl ${isDark
+              className={`w-24 h-24 rounded-full blur-xl ${isDark
                 ? i % 3 === 0
-                  ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30"
+                  ? "bg-gradient-to-r from-blue-400/20 to-purple-400/20"
                   : i % 3 === 1
-                    ? "bg-gradient-to-r from-purple-400/30 to-pink-400/30"
-                    : "bg-gradient-to-r from-pink-400/30 to-orange-400/30"
+                    ? "bg-gradient-to-r from-purple-400/20 to-pink-400/20"
+                    : "bg-gradient-to-r from-pink-400/20 to-orange-400/20"
                 : i % 3 === 0
-                  ? "bg-gradient-to-r from-blue-200/50 to-purple-200/50"
+                  ? "bg-gradient-to-r from-blue-200/30 to-purple-200/30"
                   : i % 3 === 1
-                    ? "bg-gradient-to-r from-purple-200/50 to-pink-200/50"
-                    : "bg-gradient-to-r from-pink-200/50 to-orange-200/50"
+                    ? "bg-gradient-to-r from-purple-200/30 to-pink-200/30"
+                    : "bg-gradient-to-r from-pink-200/30 to-orange-200/30"
                 }`}
             />
           </div>
@@ -1083,17 +1082,21 @@ export default function UltimatePortfolio() {
                   </h3>
                   <div className="space-y-6">
                     {[
-                      { icon: Mail, label: "Email", value: portfolioData.email, color: "from-blue-400 to-blue-600" },
-                      { icon: Github, label: "GitHub", value: "MuhammadKhan148", color: "from-green-400 to-green-600" },
+                      { icon: Mail, label: "Email", value: portfolioData.email, color: "from-blue-400 to-blue-600", href: `mailto:${portfolioData.email}` },
+                      { icon: Github, label: "GitHub", value: "MuhammadKhan148", color: "from-green-400 to-green-600", href: portfolioData.github },
                       {
                         icon: Linkedin,
                         label: "LinkedIn",
                         value: "Muhammad Abdullah Khan",
                         color: "from-purple-400 to-purple-600",
+                        href: portfolioData.linkedin
                       },
                     ].map((contact, index) => (
-                      <div
+                      <Link
                         key={contact.label}
+                        href={contact.href}
+                        target={contact.label === "Email" ? "_self" : "_blank"}
+                        rel={contact.label === "Email" ? "" : "noopener noreferrer"}
                         className="flex items-center gap-4 group magnetic hover:translate-x-2 transition-transform duration-300"
                         onMouseEnter={() => setCursorVariant("hover")}
                         onMouseLeave={() => setCursorVariant("default")}
@@ -1116,7 +1119,7 @@ export default function UltimatePortfolio() {
                             {contact.value}
                           </p>
                         </div>
-                      </div>
+                      </Link>
                     ))}
                   </div>
                 </div>
