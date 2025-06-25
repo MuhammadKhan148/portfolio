@@ -339,7 +339,7 @@ export default function UltimatePortfolio() {
             <div
               className={`text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient-flow`}
             >
-              Alex Rivera
+              Muhammad Abdullah Khan
             </div>
 
             {/* Desktop Navigation */}
@@ -815,7 +815,8 @@ export default function UltimatePortfolio() {
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -857,13 +858,13 @@ export default function UltimatePortfolio() {
                   </h3>
                   <div className="space-y-6">
                     {[
-                      { icon: Mail, label: "Email", value: "alex@example.com", color: "from-blue-400 to-blue-600" },
-                      { icon: Phone, label: "Phone", value: "+1 (555) 123-4567", color: "from-green-400 to-green-600" },
+                      { icon: Mail, label: "Email", value: "muhammad.mak252@gmail.com", color: "from-blue-400 to-blue-600" },
+                      { icon: Github, label: "GitHub", value: "@MuhammadKhan148", color: "from-slate-400 to-slate-600" },
                       {
-                        icon: MapPin,
-                        label: "Location",
-                        value: "San Francisco, CA",
-                        color: "from-purple-400 to-purple-600",
+                        icon: Linkedin,
+                        label: "LinkedIn",
+                        value: "/in/muhammad-abdullah-khan",
+                        color: "from-blue-500 to-blue-700",
                       },
                     ].map((contact, index) => (
                       <div
@@ -996,7 +997,7 @@ export default function UltimatePortfolio() {
       >
         <div className="max-w-7xl mx-auto text-center">
           <p className={isDark ? "text-slate-400" : "text-slate-600"}>
-            © 2024 Alex Rivera. Crafted with passion and precision. All rights reserved.
+            © 2024 Muhammad Abdullah Khan. AI-focused Software Engineer. All rights reserved.
           </p>
         </div>
       </footer>
