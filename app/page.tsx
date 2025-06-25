@@ -24,10 +24,43 @@ import {
   Target,
   Activity,
   Terminal,
+  Moon,
+  Sun,
+  Menu,
+  X,
+  ChevronUp,
+  Phone,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
+
+// Custom hook for intersection observer
+const useIntersectionObserver = (options = {}) => {
+  const [isIntersecting, setIsIntersecting] = useState(false)
+  const [hasIntersected, setHasIntersected] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting)
+        if (entry.isIntersecting && !hasIntersected) {
+          setHasIntersected(true)
+        }
+      },
+      { threshold: 0.1, ...options },
+    )
+
+    if (ref.current) {
+      observer.observe(ref.current)
+    }
+
+    return () => observer.disconnect()
+  }, [hasIntersected])
+
+  return [ref, isIntersecting, hasIntersected] as const
+}
 
 export default function Portfolio() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -35,28 +68,76 @@ export default function Portfolio() {
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set())
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
+  const [isDark, setIsDark] = useState(true)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [scrollY, setScrollY] = useState(0)
+  const [showScrollTop, setShowScrollTop] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   const heroRef = useRef<HTMLElement>(null)
+  const magneticRefs = useRef<HTMLElement[]>([])
 
+  // Intersection observer refs
+  const [heroSectionRef, heroInView, heroHasIntersected] = useIntersectionObserver()
+  const [aboutSectionRef, aboutInView, aboutHasIntersected] = useIntersectionObserver()
+  const [skillsSectionRef, skillsInView, skillsHasIntersected] = useIntersectionObserver()
+  const [projectsSectionRef, projectsInView, projectsHasIntersected] = useIntersectionObserver()
+  const [contactSectionRef, contactInView, contactHasIntersected] = useIntersectionObserver()
+
+  // Initialize component
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
+    setIsLoaded(true)
   }, [])
 
   useEffect(() => {
     loadGitHubProjects()
   }, [])
 
-  // Mouse tracking for parallax effects
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY })
-    }
-    window.addEventListener("mousemove", handleMouseMove)
-    return () => window.removeEventListener("mousemove", handleMouseMove)
+  // Enhanced mouse tracking with magnetic effects
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const x = e.clientX
+    const y = e.clientY
+    setMousePosition({ x, y })
+
+    // Magnetic effect for buttons
+    magneticRefs.current.forEach((el) => {
+      if (el) {
+        const rect = el.getBoundingClientRect()
+        const centerX = rect.left + rect.width / 2
+        const centerY = rect.top + rect.height / 2
+        const deltaX = x - centerX
+        const deltaY = y - centerY
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+        if (distance < 100) {
+          const strength = (100 - distance) / 100
+          el.style.transform = `translate(${deltaX * strength * 0.15}px, ${deltaY * strength * 0.15}px)`
+        } else {
+          el.style.transform = "translate(0px, 0px)"
+        }
+      }
+    })
   }, [])
+
+  const handleScroll = useCallback(() => {
+    const currentScrollY = window.scrollY
+    setIsScrolled(currentScrollY > 50)
+    setScrollY(currentScrollY)
+    setShowScrollTop(currentScrollY > 500)
+  }, [])
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("scroll", handleScroll)
+
+    // Add magnetic effect to buttons
+    const buttons = document.querySelectorAll(".magnetic")
+    magneticRefs.current = Array.from(buttons) as HTMLElement[]
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("scroll", handleScroll)
+    }
+  }, [handleMouseMove, handleScroll])
 
   // Intersection Observer for animations
   useEffect(() => {
@@ -99,6 +180,14 @@ export default function Portfolio() {
     const timer = setTimeout(createMatrixRain, 1000)
     return () => clearTimeout(timer)
   }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
+
+  const toggleTheme = () => {
+    setIsDark(!isDark)
+  }
 
   const loadGitHubProjects = async () => {
     setIsLoadingProjects(true)
@@ -252,81 +341,161 @@ export default function Portfolio() {
   ]
 
   return (
-    <div className="min-h-screen cyber-bg overflow-x-hidden">
-      {/* Matrix Rain Effect */}
-      <div className="matrix-rain fixed inset-0 z-0"></div>
+    <div
+      className={`min-h-screen transition-colors duration-500 ${isDark ? "bg-slate-950 text-white" : "bg-white text-slate-900"
+        }`}
+    >
+      {/* Enhanced Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div
+          className={`absolute inset-0 opacity-30 transition-opacity duration-500 ${isDark
+            ? "bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20"
+            : "bg-gradient-to-br from-blue-100/40 via-purple-100/40 to-pink-100/40"
+            }`}
+          style={{
+            transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`,
+          }}
+        />
 
-      {/* Cyberpunk Navigation */}
+        {/* Matrix Rain Effect */}
+        <div className="matrix-rain absolute inset-0 z-0 opacity-20" />
+
+        {/* Floating particles */}
+        {[...Array(8)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute animate-float opacity-20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${15 + Math.random() * 10}s`,
+            }}
+          >
+            <div
+              className={`w-24 h-24 rounded-full blur-xl ${isDark
+                ? i % 3 === 0
+                  ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30"
+                  : i % 3 === 1
+                    ? "bg-gradient-to-r from-purple-400/30 to-pink-400/30"
+                    : "bg-gradient-to-r from-pink-400/30 to-orange-400/30"
+                : i % 3 === 0
+                  ? "bg-gradient-to-r from-blue-200/50 to-purple-200/50"
+                  : i % 3 === 1
+                    ? "bg-gradient-to-r from-purple-200/50 to-pink-200/50"
+                    : "bg-gradient-to-r from-pink-200/50 to-orange-200/50"
+                }`}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* Enhanced Navigation */}
       <nav
-        className={`fixed top-0 z-50 w-full transition-all duration-500 ${isScrolled ? "cyber-card backdrop-blur-xl border-b border-cyber-blue/20" : "bg-transparent"
+        className={`fixed top-0 w-full backdrop-blur-xl border-b z-40 transition-all duration-500 ${isDark ? "bg-slate-950/80 border-slate-800/50" : "bg-white/80 border-slate-200/50"
           }`}
       >
-        <div className="container flex h-16 items-center">
-          <div className="mr-4 flex">
-            <Link href="#" className="mr-6 flex items-center space-x-2 group">
-              <div className="relative">
-                <Terminal className="h-7 w-7 text-cyber-blue group-hover:text-cyber-green transition-all duration-300 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-cyber-blue/20 rounded-full blur-xl group-hover:bg-cyber-green/30 transition-all duration-300" />
-              </div>
-              <span className="font-cyber font-bold text-xl cyber-title">MAK.DEV</span>
-            </Link>
-          </div>
-          <div className="flex flex-1 items-center justify-between space-x-2 md:justify-end">
-            <nav className="flex items-center space-x-8 text-sm font-medium font-tech">
-              {["About", "Experience", "Skills", "Projects", "Contact"].map((item, index) => (
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+              MAK.DEV
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center space-x-8">
+              {["About", "Experience", "Skills", "Projects", "Contact"].map((item) => (
                 <Link
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className="relative transition-all duration-300 hover:text-cyber-blue group text-white"
-                  style={{ animationDelay: `${index * 0.1}s` }}
+                  className={`relative transition-all duration-300 group magnetic ${isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    }`}
                 >
                   {item}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-cyber-blue to-cyber-green group-hover:w-full transition-all duration-300" />
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full transition-all duration-500 ease-out" />
                 </Link>
               ))}
-            </nav>
+
+              <Button variant="ghost" size="icon" onClick={toggleTheme} className="magnetic rounded-full">
+                {isDark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="md:hidden"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+            </Button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div
+            className={`md:hidden border-t ${isDark ? "bg-slate-950/95 border-slate-800" : "bg-white/95 border-slate-200"
+              } backdrop-blur-xl`}
+          >
+            <div className="px-6 py-4 space-y-4">
+              {["About", "Experience", "Skills", "Projects", "Contact"].map((item) => (
+                <Link
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className={`block py-2 transition-colors ${isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    }`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {item}
+                </Link>
+              ))}
+              <Button variant="outline" onClick={toggleTheme} className="w-full">
+                {isDark ? (
+                  <>
+                    <Sun className="h-4 w-4 mr-2" />
+                    Light Mode
+                  </>
+                ) : (
+                  <>
+                    <Moon className="h-4 w-4 mr-2" />
+                    Dark Mode
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
       </nav>
 
-      {/* Enhanced Cyberpunk Hero Section */}
-      <section ref={heroRef} className="relative overflow-hidden pt-20 min-h-screen flex items-center">
-        {/* Animated Background Grid */}
-        <div className="absolute inset-0 cyber-grid opacity-20" />
-
-        {/* Floating Particles */}
-        <div className="particles absolute inset-0">
-          {[...Array(30)].map((_, i) => (
-            <div
-              key={i}
-              className="particle"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 8}s`,
-                animationDuration: `${8 + Math.random() * 4}s`,
-              }}
-            />
-          ))}
-        </div>
-
+      {/* Enhanced Hero Section */}
+      <section
+        ref={heroSectionRef}
+        className="pt-24 pb-16 px-6 lg:px-8 min-h-screen flex items-center relative"
+        style={{
+          transform: `translateY(${scrollY * 0.3}px)`,
+        }}
+      >
         {/* Holographic Orbs */}
         <div className="absolute inset-0">
           <div
-            className="absolute top-20 left-10 w-72 h-72 bg-cyber-blue/20 rounded-full blur-3xl animate-cyber-float"
+            className={`absolute top-20 left-10 w-72 h-72 rounded-full blur-3xl animate-cyber-float ${isDark ? "bg-blue-400/20" : "bg-blue-200/30"
+              }`}
             style={{
               transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
             }}
           />
           <div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-cyber-purple/20 rounded-full blur-3xl animate-cyber-float"
+            className={`absolute bottom-20 right-10 w-96 h-96 rounded-full blur-3xl animate-cyber-float ${isDark ? "bg-purple-400/20" : "bg-purple-200/30"
+              }`}
             style={{
               transform: `translate(${mousePosition.x * -0.01}px, ${mousePosition.y * -0.01}px)`,
               animationDelay: "2s",
             }}
           />
           <div
-            className="absolute top-1/2 left-1/2 w-80 h-80 bg-cyber-green/20 rounded-full blur-3xl animate-cyber-float"
+            className={`absolute top-1/2 left-1/2 w-80 h-80 rounded-full blur-3xl animate-cyber-float ${isDark ? "bg-pink-400/20" : "bg-pink-200/30"
+              }`}
             style={{
               transform: `translate(-50%, -50%) translate(${mousePosition.x * 0.015}px, ${mousePosition.y * 0.015}px)`,
               animationDelay: "4s",
@@ -334,94 +503,158 @@ export default function Portfolio() {
           />
         </div>
 
-        <div className="container relative px-4 py-32 md:py-40 z-10">
-          <div className="flex flex-col items-center text-center space-y-8 max-w-4xl mx-auto">
-            <div className="space-y-6">
-              <div className="inline-flex items-center rounded-full cyber-card border border-cyber-green/50 px-6 py-3 text-sm text-cyber-green backdrop-blur-sm animate-cyber-glow">
-                <Activity className="mr-2 h-4 w-4 animate-cyber-pulse" />
-                <span className="font-tech animate-neon-flicker">SYSTEM ONLINE • AVAILABLE FOR HIRE</span>
+        <div className="max-w-7xl mx-auto w-full">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
+            <div className={`transition-all duration-2000 delay-300 ${isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}>
+              {/* Status Badge */}
+              <div className={`inline-flex items-center gap-3 px-6 py-3 backdrop-blur-xl border rounded-full mb-8 group hover:scale-105 transition-all duration-300 ${isDark
+                ? "bg-gradient-to-r from-slate-800/50 to-slate-700/50 border-slate-700/50"
+                : "bg-gradient-to-r from-white/50 to-slate-100/50 border-slate-300/50"
+                }`}>
+                <div className="relative">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
+                  <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-ping" />
+                </div>
+                <span className={`text-sm font-medium transition-colors ${isDark ? "text-slate-300 group-hover:text-white" : "text-slate-600 group-hover:text-slate-900"
+                  }`}>Available for hire</span>
+                <Sparkles className="w-4 h-4 text-yellow-400 animate-spin-slow" />
               </div>
 
-              <h1 className="text-5xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl font-cyber">
-                <span className="block text-white mb-4">INITIALIZING...</span>
-                <span className="relative">
-                  <span className="cyber-title glitch" data-text="MUHAMMAD ABDULLAH KHAN">
-                    MUHAMMAD ABDULLAH KHAN
-                  </span>
-                  <div className="absolute -inset-1 bg-gradient-to-r from-cyber-blue/20 via-cyber-purple/20 to-cyber-green/20 blur-2xl -z-10 animate-holographic-shift" />
+              {/* Main Heading with Advanced Typography */}
+              <h1 className="text-6xl lg:text-7xl font-black mb-8 leading-tight">
+                <span className="inline-block animate-text-reveal-up opacity-0" style={{ animationDelay: '0.5s', animationFillMode: 'forwards' }}>
+                  <span className={`bg-gradient-to-r bg-clip-text text-transparent ${isDark ? "from-white to-slate-300" : "from-slate-900 to-slate-600"
+                    }`}>MUHAMMAD</span>
+                </span>
+                <br />
+                <span className="inline-block animate-text-reveal-up opacity-0" style={{ animationDelay: '0.7s', animationFillMode: 'forwards' }}>
+                  <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient-flow">ABDULLAH</span>
+                </span>
+                <br />
+                <span className="inline-block animate-text-reveal-up opacity-0" style={{ animationDelay: '0.9s', animationFillMode: 'forwards' }}>
+                  <span className={isDark ? "text-slate-400" : "text-slate-500"}>KHAN</span>
                 </span>
               </h1>
 
+              {/* Enhanced Description */}
               <div className="space-y-4">
-                <p className="mx-auto max-w-3xl text-xl text-cyber-blue md:text-2xl leading-relaxed font-tech font-medium">
-                  <span className="text-cyber-green font-bold">&gt; AI/ML ENGINEER</span> &
-                  <span className="text-cyber-purple font-bold"> FULL-STACK DEVELOPER</span>
+                <p className={`text-xl md:text-2xl font-medium animate-fade-in-up opacity-0 ${isDark ? "text-slate-300" : "text-slate-600"
+                  }`} style={{ animationDelay: '1.1s', animationFillMode: 'forwards' }}>
+                  <span className="text-blue-400 font-bold">&gt; AI/ML ENGINEER</span> &
+                  <span className="text-purple-400 font-bold"> FULL-STACK DEVELOPER</span>
                 </p>
-                <p className="mx-auto max-w-3xl text-lg text-gray-300 leading-relaxed font-tech">
-                  Specializing in <span className="text-cyber-blue font-semibold">emotion-aware systems</span>,
+                <p className={`text-lg leading-relaxed max-w-2xl animate-fade-in-up opacity-0 ${isDark ? "text-slate-400" : "text-slate-600"
+                  }`} style={{ animationDelay: '1.3s', animationFillMode: 'forwards' }}>
+                  Specializing in <span className="text-blue-400 font-semibold">emotion-aware systems</span>,
                   conversational AI, and scalable web applications. Creator of
-                  <span className="text-cyber-green font-semibold"> 24+ open-source projects</span> with
-                  <span className="text-cyber-purple font-semibold"> 100% ★5 freelance record</span>.
+                  <span className="text-green-400 font-semibold"> 24+ open-source projects</span> with
+                  <span className="text-purple-400 font-semibold"> 100% ★5 freelance record</span>.
                 </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 mt-8 animate-fade-in-up opacity-0" style={{ animationDelay: '1.5s', animationFillMode: 'forwards' }}>
+                <Button
+                  size="lg"
+                  className="magnetic bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 px-8 py-4 text-lg font-semibold"
+                  asChild
+                >
+                  <Link href="#projects">
+                    <Rocket className="mr-2 h-5 w-5" />
+                    EXPLORE PROJECTS
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className={`magnetic px-8 py-4 text-lg font-semibold ${isDark
+                    ? "border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                    : "border-slate-300 text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                    }`}
+                  asChild
+                >
+                  <Link href="/files/Muhammad_Abdullah_Khan_Resume.pdf" target="_blank">
+                    <Download className="mr-2 h-5 w-5" />
+                    DOWNLOAD RESUME
+                  </Link>
+                </Button>
+              </div>
+
+              {/* Social Links */}
+              <div className="flex items-center space-x-6 mt-8 animate-fade-in-up opacity-0" style={{ animationDelay: '1.7s', animationFillMode: 'forwards' }}>
+                {[
+                  {
+                    icon: Github,
+                    href: "https://github.com/MuhammadKhan148",
+                    label: "GitHub",
+                    color: "hover:text-blue-400",
+                  },
+                  {
+                    icon: Linkedin,
+                    href: "https://www.linkedin.com/in/muhammad-abdullah-khan-01271a263/",
+                    label: "LinkedIn",
+                    color: "hover:text-purple-400",
+                  },
+                  {
+                    icon: Mail,
+                    href: "mailto:muhammad.mak252@gmail.com",
+                    label: "Email",
+                    color: "hover:text-pink-400",
+                  },
+                ].map(({ icon: Icon, href, label, color }, index) => (
+                  <Button
+                    key={label}
+                    variant="ghost"
+                    size="icon"
+                    className={`h-12 w-12 rounded-full magnetic transition-all duration-300 hover:scale-110 ${isDark
+                      ? "border border-slate-700 hover:bg-slate-800"
+                      : "border border-slate-300 hover:bg-slate-100"
+                      } ${color}`}
+                    style={{ animationDelay: `${index * 0.1}s` }}
+                    asChild
+                  >
+                    <Link href={href} target="_blank">
+                      <Icon className="h-6 w-6" />
+                      <span className="sr-only">{label}</span>
+                    </Link>
+                  </Button>
+                ))}
               </div>
             </div>
 
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Button size="lg" className="cyber-btn px-8 py-4 text-lg font-cyber" asChild>
-                <Link href="#projects">
-                  <Rocket className="mr-2 h-5 w-5" />
-                  EXPLORE PROJECTS
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="holographic border-2 border-cyber-blue/50 hover:border-cyber-blue text-white px-8 py-4 text-lg font-tech"
-                asChild
-              >
-                <Link href="/files/Muhammad_Abdullah_Khan_Resume.pdf" target="_blank">
-                  <Download className="mr-2 h-5 w-5" />
-                  DOWNLOAD RESUME
-                </Link>
-              </Button>
-            </div>
+            {/* Profile Image with Modern Design */}
+            <div className={`relative transition-all duration-2000 delay-700 ${isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
+              <div className="relative">
+                {/* Floating Rings */}
+                <div className="absolute inset-0 animate-spin-slow">
+                  <div className={`w-full h-full rounded-full border-2 border-dashed ${isDark ? "border-blue-400/30" : "border-blue-400/50"
+                    }`}></div>
+                </div>
+                <div className="absolute inset-4 animate-spin-slow" style={{ animationDirection: 'reverse' }}>
+                  <div className={`w-full h-full rounded-full border border-dashed ${isDark ? "border-purple-400/30" : "border-purple-400/50"
+                    }`}></div>
+                </div>
 
-            <div className="flex items-center space-x-6 pt-8">
-              {[
-                {
-                  icon: Github,
-                  href: "https://github.com/MuhammadKhan148",
-                  label: "GitHub",
-                  color: "hover:text-cyber-blue",
-                },
-                {
-                  icon: Linkedin,
-                  href: "https://www.linkedin.com/in/muhammad-abdullah-khan-01271a263/",
-                  label: "LinkedIn",
-                  color: "hover:text-cyber-green",
-                },
-                {
-                  icon: Mail,
-                  href: "mailto:muhammad.mak252@gmail.com",
-                  label: "Email",
-                  color: "hover:text-cyber-purple",
-                },
-              ].map(({ icon: Icon, href, label, color }, index) => (
-                <Button
-                  key={label}
-                  variant="ghost"
-                  size="icon"
-                  className={`h-12 w-12 rounded-full cyber-card border border-cyber-blue/20 ${color} transition-all duration-300 hover:scale-110 hover:animate-cyber-glow`}
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                  asChild
-                >
-                  <Link href={href} target="_blank">
-                    <Icon className="h-6 w-6" />
-                    <span className="sr-only">{label}</span>
-                  </Link>
-                </Button>
-              ))}
+                {/* Profile Image */}
+                <div className="relative z-10 p-8">
+                  <div className="relative group">
+                    <Image
+                      src="/images/muhammad-profile.jpg"
+                      alt="Muhammad Abdullah Khan"
+                      width={400}
+                      height={400}
+                      className="rounded-3xl w-full h-auto shadow-2xl transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-blue-400/20 via-purple-400/20 to-pink-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  </div>
+                </div>
+
+                {/* Decorative Elements */}
+                <div className="absolute top-8 right-8 w-4 h-4 bg-green-400 rounded-full animate-pulse"></div>
+                <div className="absolute bottom-12 left-8 w-3 h-3 bg-blue-400 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                <div className="absolute top-1/2 right-4 w-2 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: '2s' }}></div>
+              </div>
             </div>
           </div>
         </div>
@@ -792,101 +1025,151 @@ export default function Portfolio() {
         </div>
       </section>
 
-      {/* Enhanced Contact Section */}
-      <section id="contact" className="py-24 relative overflow-hidden z-10">
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-cyber-blue/20 rounded-full blur-3xl animate-cyber-float" />
-          <div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-cyber-purple/20 rounded-full blur-3xl animate-cyber-float"
-            style={{ animationDelay: "2s" }}
-          />
+      {/* Ultra Premium Contact Section with v0 Design */}
+      <section
+        ref={contactSectionRef}
+        id="contact"
+        className={`py-24 px-6 lg:px-8 relative overflow-hidden ${isDark
+          ? "bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950"
+          : "bg-gradient-to-br from-slate-100 via-blue-100 to-purple-100"
+          }`}
+      >
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.3),transparent_50%)] animate-pulse-slow" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(147,51,234,0.3),transparent_50%)] animate-pulse-slow" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="container px-4 relative">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className={`${visibleSections.has("contact") ? "animate-cyber-float" : "opacity-0"}`}>
-              <h2 className="text-4xl font-bold tracking-tight mb-4 cyber-title font-cyber">CONTACT.INIT</h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-cyber-blue to-cyber-green mx-auto rounded-full mb-8 animate-cyber-glow" />
-              <p className="text-xl text-gray-300 mb-12 max-w-2xl mx-auto leading-relaxed font-tech">
-                Ready to collaborate on cutting-edge AI projects? Let's build the future together with innovative
-                technology solutions.
-              </p>
-            </div>
-
-            <div className="grid gap-8 md:grid-cols-3 mb-12">
-              {[
-                {
-                  icon: Mail,
-                  title: "Email Protocol",
-                  description: "muhammad.mak252@gmail.com",
-                  action: "Send Message",
-                  href: "mailto:muhammad.mak252@gmail.com",
-                },
-                {
-                  icon: Linkedin,
-                  title: "Network Connect",
-                  description: "Professional networking hub",
-                  action: "Connect Now",
-                  href: "https://www.linkedin.com/in/muhammad-abdullah-khan-01271a263/",
-                },
-                {
-                  icon: Github,
-                  title: "Code Repository",
-                  description: "Open source contributions",
-                  action: "Explore Code",
-                  href: "https://github.com/MuhammadKhan148",
-                },
-              ].map((contact, index) => (
-                <Card
-                  key={index}
-                  className={`border-0 shadow-lg hover:shadow-2xl transition-all duration-500 cyber-card border border-cyber-blue/20 hover:border-cyber-blue/50 group ${visibleSections.has("contact") ? "animate-cyber-float" : "opacity-0"
-                    }`}
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
-                  <CardContent className="p-6 text-center">
-                    <div className="mx-auto mb-4 p-3 rounded-full bg-gradient-to-br from-cyber-blue/20 to-cyber-green/20 w-fit group-hover:scale-110 transition-transform duration-300 border border-cyber-blue/30">
-                      <contact.icon className="h-6 w-6 text-cyber-blue" />
-                    </div>
-                    <h3 className="font-semibold text-white mb-2 font-cyber">{contact.title}</h3>
-                    <p className="text-sm text-gray-300 mb-4 font-tech">{contact.description}</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="holographic border border-cyber-blue/50 hover:border-cyber-blue text-white font-tech"
-                      asChild
-                    >
-                      <Link href={contact.href} target="_blank">
-                        {contact.action}
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div
-              className={`flex flex-col sm:flex-row gap-4 justify-center ${visibleSections.has("contact") ? "animate-cyber-float" : "opacity-0"}`}
-            >
-              <Button size="lg" className="cyber-btn px-8 py-4 text-lg font-cyber" asChild>
-                <Link href="mailto:muhammad.mak252@gmail.com">
-                  <Mail className="mr-2 h-5 w-5" />
-                  INITIATE CONTACT
-                  <Target className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="holographic border-2 border-cyber-blue/50 hover:border-cyber-blue text-white px-8 py-4 text-lg font-tech"
-                asChild
-              >
-                <Link href="/files/Muhammad_Abdullah_Khan_Resume.pdf" target="_blank">
-                  <Download className="mr-2 h-5 w-5" />
-                  DOWNLOAD RESUME
-                </Link>
-              </Button>
-            </div>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <div className={`text-center mb-20 transition-all duration-1000 ${contactHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+            }`}>
+            <h2 className="text-6xl font-bold mb-6 bg-gradient-to-r from-white via-blue-200 to-purple-200 bg-clip-text text-transparent">
+              Let's Build the Future
+            </h2>
+            <p className="text-xl text-slate-300">
+              Ready to create something extraordinary together?
+            </p>
           </div>
+
+          <Card className={`backdrop-blur-2xl relative overflow-hidden transform hover:scale-105 transition-all duration-500 ${contactHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+            } ${isDark ? "bg-slate-900/30 border-slate-800/50" : "bg-white/80 border-slate-200/50"}`}>
+            {/* Animated Border */}
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-[1px] rounded-lg">
+              <div className={`w-full h-full rounded-lg ${isDark ? "bg-slate-900/90" : "bg-white/90"}`} />
+            </div>
+
+            <CardContent className="p-12 relative z-10">
+              <div className="grid md:grid-cols-2 gap-12">
+                {/* Contact Info with Enhanced Design */}
+                <div>
+                  <h3 className={`text-3xl font-bold mb-8 ${isDark ? "text-white" : "text-slate-900"}`}>Get In Touch</h3>
+                  <div className="space-y-8">
+                    {[
+                      {
+                        icon: Mail,
+                        label: 'Email',
+                        value: 'muhammad.mak252@gmail.com',
+                        color: 'from-blue-400 to-blue-600',
+                        href: 'mailto:muhammad.mak252@gmail.com'
+                      },
+                      {
+                        icon: Github,
+                        label: 'GitHub',
+                        value: '@MuhammadKhan148',
+                        color: 'from-slate-400 to-slate-600',
+                        href: 'https://github.com/MuhammadKhan148'
+                      },
+                      {
+                        icon: Linkedin,
+                        label: 'LinkedIn',
+                        value: '/in/muhammad-abdullah-khan',
+                        color: 'from-blue-500 to-blue-700',
+                        href: 'https://www.linkedin.com/in/muhammad-abdullah-khan-01271a263/'
+                      },
+                      {
+                        icon: Phone,
+                        label: 'Available',
+                        value: 'Mon-Fri 9AM-6PM PST',
+                        color: 'from-green-500 to-green-700',
+                        href: '#'
+                      },
+                    ].map((contact, index) => (
+                      <Link
+                        key={contact.label}
+                        href={contact.href}
+                        target="_blank"
+                        className="flex items-center gap-6 group cursor-pointer hover:translate-x-4 transition-transform duration-300"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                      >
+                        <div className={`w-16 h-16 bg-gradient-to-r ${contact.color} rounded-2xl flex items-center justify-center group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 shadow-2xl group-hover:shadow-xl`}>
+                          <contact.icon className="h-7 w-7 text-white" />
+                        </div>
+                        <div>
+                          <p className={`font-bold text-xl ${isDark ? "text-white" : "text-slate-900"}`}>{contact.label}</p>
+                          <p className={`group-hover:text-blue-400 transition-colors text-lg ${isDark ? "text-slate-300 group-hover:text-white" : "text-slate-600 group-hover:text-slate-900"
+                            }`}>{contact.value}</p>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Contact Form with Premium Styling */}
+                <div>
+                  <h3 className={`text-3xl font-bold mb-8 ${isDark ? "text-white" : "text-slate-900"}`}>Send a Message</h3>
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className={`text-sm font-medium mb-2 block ${isDark ? "text-slate-200" : "text-slate-700"}`}>First Name</label>
+                        <input
+                          type="text"
+                          className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-slate-400 transition-all duration-300 focus:scale-105 backdrop-blur-sm border ${isDark ? "bg-white/10 border-white/20 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                            }`}
+                          placeholder="John"
+                        />
+                      </div>
+                      <div>
+                        <label className={`text-sm font-medium mb-2 block ${isDark ? "text-slate-200" : "text-slate-700"}`}>Last Name</label>
+                        <input
+                          type="text"
+                          className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-slate-400 transition-all duration-300 focus:scale-105 backdrop-blur-sm border ${isDark ? "bg-white/10 border-white/20 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                            }`}
+                          placeholder="Doe"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className={`text-sm font-medium mb-2 block ${isDark ? "text-slate-200" : "text-slate-700"}`}>Email</label>
+                      <input
+                        type="email"
+                        className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-slate-400 transition-all duration-300 focus:scale-105 backdrop-blur-sm border ${isDark ? "bg-white/10 border-white/20 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                          }`}
+                        placeholder="john@example.com"
+                      />
+                    </div>
+
+                    <div>
+                      <label className={`text-sm font-medium mb-2 block ${isDark ? "text-slate-200" : "text-slate-700"}`}>Project Details</label>
+                      <textarea
+                        rows={4}
+                        className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent placeholder-slate-400 transition-all duration-300 focus:scale-105 backdrop-blur-sm resize-none border ${isDark ? "bg-white/10 border-white/20 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                          }`}
+                        placeholder="Tell me about your project vision..."
+                      />
+                    </div>
+
+                    <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 group py-3 text-lg font-medium magnetic">
+                      <span className="flex items-center justify-center">
+                        Send Message
+                        <Rocket className="ml-2 h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </section>
 
@@ -931,6 +1214,21 @@ export default function Portfolio() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <Button
+          onClick={scrollToTop}
+          className={`fixed bottom-6 right-6 z-50 rounded-full w-12 h-12 magnetic transition-all duration-300 hover:scale-110 ${isDark
+            ? "bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
+            : "bg-white hover:bg-slate-100 text-slate-900 border border-slate-300"
+            }`}
+          size="icon"
+        >
+          <ChevronUp className="w-5 h-5" />
+          <span className="sr-only">Scroll to top</span>
+        </Button>
+      )}
     </div>
   )
 }
