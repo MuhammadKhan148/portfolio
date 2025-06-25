@@ -72,9 +72,8 @@ export default function PremiumPortfolio() {
       {/* Custom Cursor */}
       <div
         ref={cursorRef}
-        className={`fixed w-6 h-6 pointer-events-none z-50 mix-blend-difference transition-all duration-300 ${
-          cursorVariant === "hover" ? "scale-150 bg-white rounded-full" : "scale-100 bg-slate-900 rounded-full"
-        }`}
+        className={`fixed w-6 h-6 pointer-events-none z-50 mix-blend-difference transition-all duration-300 ${cursorVariant === "hover" ? "scale-150 bg-white rounded-full" : "scale-100 bg-slate-900 rounded-full"
+          }`}
         style={{ transform: "translate(-50%, -50%)" }}
       />
 
@@ -97,15 +96,14 @@ export default function PremiumPortfolio() {
             }}
           >
             <div
-              className={`w-32 h-32 rounded-full blur-xl ${
-                i % 4 === 0
+              className={`w-32 h-32 rounded-full blur-xl ${i % 4 === 0
                   ? "bg-gradient-to-r from-blue-400 to-purple-400"
                   : i % 4 === 1
                     ? "bg-gradient-to-r from-purple-400 to-pink-400"
                     : i % 4 === 2
                       ? "bg-gradient-to-r from-pink-400 to-orange-400"
                       : "bg-gradient-to-r from-orange-400 to-yellow-400"
-              }`}
+                }`}
             />
           </div>
         ))}

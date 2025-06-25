@@ -102,11 +102,10 @@ export default function WorkingPortfolio() {
       {/* Enhanced Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
-          className={`absolute inset-0 opacity-30 transition-opacity duration-500 ${
-            isDark
+          className={`absolute inset-0 opacity-30 transition-opacity duration-500 ${isDark
               ? "bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20"
               : "bg-gradient-to-br from-blue-100/40 via-purple-100/40 to-pink-100/40"
-          }`}
+            }`}
           style={{
             transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`,
           }}
@@ -125,8 +124,7 @@ export default function WorkingPortfolio() {
             }}
           >
             <div
-              className={`w-24 h-24 rounded-full blur-xl ${
-                isDark
+              className={`w-24 h-24 rounded-full blur-xl ${isDark
                   ? i % 3 === 0
                     ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30"
                     : i % 3 === 1
@@ -137,7 +135,7 @@ export default function WorkingPortfolio() {
                     : i % 3 === 1
                       ? "bg-gradient-to-r from-purple-200/50 to-pink-200/50"
                       : "bg-gradient-to-r from-pink-200/50 to-orange-200/50"
-              }`}
+                }`}
             />
           </div>
         ))}
@@ -145,9 +143,8 @@ export default function WorkingPortfolio() {
 
       {/* Navigation */}
       <nav
-        className={`fixed top-0 w-full backdrop-blur-xl border-b z-40 transition-all duration-500 ${
-          isDark ? "bg-slate-950/80 border-slate-800/50" : "bg-white/80 border-slate-200/50"
-        }`}
+        className={`fixed top-0 w-full backdrop-blur-xl border-b z-40 transition-all duration-500 ${isDark ? "bg-slate-950/80 border-slate-800/50" : "bg-white/80 border-slate-200/50"
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
@@ -161,9 +158,8 @@ export default function WorkingPortfolio() {
                 <Link
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className={`relative transition-all duration-300 group magnetic ${
-                    isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                  }`}
+                  className={`relative transition-all duration-300 group magnetic ${isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    }`}
                 >
                   {item}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full transition-all duration-500 ease-out" />
@@ -190,18 +186,16 @@ export default function WorkingPortfolio() {
         {/* Mobile Menu */}
         {isMobileMenuOpen && (
           <div
-            className={`md:hidden border-t ${
-              isDark ? "bg-slate-950/95 border-slate-800" : "bg-white/95 border-slate-200"
-            } backdrop-blur-xl`}
+            className={`md:hidden border-t ${isDark ? "bg-slate-950/95 border-slate-800" : "bg-white/95 border-slate-200"
+              } backdrop-blur-xl`}
           >
             <div className="px-6 py-4 space-y-4">
               {["Home", "About", "Skills", "Work", "Contact"].map((item) => (
                 <Link
                   key={item}
                   href={`#${item.toLowerCase()}`}
-                  className={`block py-2 transition-colors ${
-                    isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
-                  }`}
+                  className={`block py-2 transition-colors ${isDark ? "text-slate-300 hover:text-white" : "text-slate-600 hover:text-slate-900"
+                    }`}
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item}
@@ -236,9 +230,8 @@ export default function WorkingPortfolio() {
                   <div className="absolute inset-0 w-3 h-3 bg-green-400 rounded-full animate-ping" />
                 </div>
                 <span
-                  className={`text-sm font-medium transition-colors ${
-                    isDark ? "text-slate-300 group-hover:text-white" : "text-slate-600 group-hover:text-slate-900"
-                  }`}
+                  className={`text-sm font-medium transition-colors ${isDark ? "text-slate-300 group-hover:text-white" : "text-slate-600 group-hover:text-slate-900"
+                    }`}
                 >
                   Available for projects
                 </span>
@@ -275,11 +268,10 @@ export default function WorkingPortfolio() {
                 <Button
                   variant="outline"
                   size="lg"
-                  className={`group magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-xl ${
-                    isDark
+                  className={`group magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-xl ${isDark
                       ? "border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white bg-slate-900/50"
                       : "border-slate-300 text-slate-700 hover:border-slate-400 hover:text-slate-900 bg-white/50"
-                  } backdrop-blur-sm`}
+                    } backdrop-blur-sm`}
                 >
                   <Download className="mr-2 h-4 w-4 group-hover:animate-bounce" />
                   Download Resume
@@ -297,9 +289,8 @@ export default function WorkingPortfolio() {
                   <Link
                     key={index}
                     href={social.href}
-                    className={`p-2 transition-all duration-300 hover:scale-125 hover:-translate-y-1 magnetic group ${
-                      isDark ? "text-slate-400" : "text-slate-500"
-                    } ${social.color}`}
+                    className={`p-2 transition-all duration-300 hover:scale-125 hover:-translate-y-1 magnetic group ${isDark ? "text-slate-400" : "text-slate-500"
+                      } ${social.color}`}
                   >
                     <social.icon className="w-5 h-5 group-hover:animate-pulse" />
                   </Link>
@@ -313,11 +304,10 @@ export default function WorkingPortfolio() {
             >
               <div className="relative group magnetic">
                 <div
-                  className={`relative w-full h-[600px] rounded-3xl overflow-hidden transform group-hover:scale-105 transition-all duration-700 hover:shadow-2xl ${
-                    isDark
+                  className={`relative w-full h-[600px] rounded-3xl overflow-hidden transform group-hover:scale-105 transition-all duration-700 hover:shadow-2xl ${isDark
                       ? "bg-gradient-to-br from-blue-900/50 via-purple-900/50 to-pink-900/50 hover:shadow-purple-500/20"
                       : "bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 hover:shadow-purple-500/10"
-                  }`}
+                    }`}
                 >
                   <Image
                     src="/placeholder.svg?height=600&width=500"
@@ -328,9 +318,8 @@ export default function WorkingPortfolio() {
 
                   {/* Floating Status Cards */}
                   <div
-                    className={`absolute top-6 left-6 backdrop-blur-xl rounded-2xl p-4 shadow-lg transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-500 ${
-                      isDark ? "bg-slate-900/80 border border-slate-700/50" : "bg-white/80 border border-slate-200/50"
-                    }`}
+                    className={`absolute top-6 left-6 backdrop-blur-xl rounded-2xl p-4 shadow-lg transform -translate-y-2 group-hover:translate-y-0 transition-transform duration-500 ${isDark ? "bg-slate-900/80 border border-slate-700/50" : "bg-white/80 border border-slate-200/50"
+                      }`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="relative">
@@ -342,9 +331,8 @@ export default function WorkingPortfolio() {
                   </div>
 
                   <div
-                    className={`absolute bottom-6 right-6 backdrop-blur-xl rounded-2xl p-4 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 delay-100 ${
-                      isDark ? "bg-slate-900/80 border border-slate-700/50" : "bg-white/80 border border-slate-200/50"
-                    }`}
+                    className={`absolute bottom-6 right-6 backdrop-blur-xl rounded-2xl p-4 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500 delay-100 ${isDark ? "bg-slate-900/80 border border-slate-700/50" : "bg-white/80 border border-slate-200/50"
+                      }`}
                   >
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-400" />
@@ -504,11 +492,10 @@ export default function WorkingPortfolio() {
             ].map((skill, index) => (
               <Card
                 key={skill.name}
-                className={`group relative backdrop-blur-sm border transition-all duration-700 hover:-translate-y-4 hover:shadow-2xl magnetic overflow-hidden ${
-                  isDark
+                className={`group relative backdrop-blur-sm border transition-all duration-700 hover:-translate-y-4 hover:shadow-2xl magnetic overflow-hidden ${isDark
                     ? "bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50"
                     : "bg-white/80 border-slate-200/50 hover:border-slate-300/50"
-                }`}
+                  }`}
               >
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${skill.color} opacity-0 group-hover:opacity-5 transition-opacity duration-500`}
@@ -522,25 +509,22 @@ export default function WorkingPortfolio() {
                   </div>
 
                   <h3
-                    className={`font-bold mb-2 text-center group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300 ${
-                      isDark ? "text-white" : "text-slate-900"
-                    }`}
+                    className={`font-bold mb-2 text-center group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300 ${isDark ? "text-white" : "text-slate-900"
+                      }`}
                   >
                     {skill.name}
                   </h3>
 
                   <p
-                    className={`text-sm mb-4 text-center transition-colors ${
-                      isDark ? "text-slate-400 group-hover:text-slate-300" : "text-slate-500 group-hover:text-slate-600"
-                    }`}
+                    className={`text-sm mb-4 text-center transition-colors ${isDark ? "text-slate-400 group-hover:text-slate-300" : "text-slate-500 group-hover:text-slate-600"
+                      }`}
                   >
                     {skill.description}
                   </p>
 
                   <div
-                    className={`relative h-2 rounded-full overflow-hidden mb-2 ${
-                      isDark ? "bg-slate-700" : "bg-slate-200"
-                    }`}
+                    className={`relative h-2 rounded-full overflow-hidden mb-2 ${isDark ? "bg-slate-700" : "bg-slate-200"
+                      }`}
                   >
                     <div
                       className={`h-full bg-gradient-to-r ${skill.color} rounded-full transition-all duration-1000 ease-out relative group-hover:animate-pulse`}
@@ -551,9 +535,8 @@ export default function WorkingPortfolio() {
                   </div>
 
                   <div
-                    className={`text-center text-sm font-medium transition-colors ${
-                      isDark ? "text-slate-300 group-hover:text-white" : "text-slate-600 group-hover:text-slate-900"
-                    }`}
+                    className={`text-center text-sm font-medium transition-colors ${isDark ? "text-slate-300 group-hover:text-white" : "text-slate-600 group-hover:text-slate-900"
+                      }`}
                   >
                     {skill.level}%
                   </div>
@@ -598,11 +581,10 @@ export default function WorkingPortfolio() {
             ].map((project, index) => (
               <Card
                 key={project.title}
-                className={`group relative backdrop-blur-sm border transition-all duration-700 hover:shadow-2xl magnetic overflow-hidden ${
-                  isDark
+                className={`group relative backdrop-blur-sm border transition-all duration-700 hover:shadow-2xl magnetic overflow-hidden ${isDark
                     ? "bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50"
                     : "bg-white/80 border-slate-200/50 hover:border-slate-300/50"
-                }`}
+                  }`}
               >
                 <div className="relative h-64 overflow-hidden">
                   <Image
@@ -638,16 +620,14 @@ export default function WorkingPortfolio() {
 
                 <CardHeader>
                   <CardTitle
-                    className={`group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300 text-2xl ${
-                      isDark ? "text-white" : "text-slate-900"
-                    }`}
+                    className={`group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-purple-600 group-hover:bg-clip-text transition-all duration-300 text-2xl ${isDark ? "text-white" : "text-slate-900"
+                      }`}
                   >
                     {project.title}
                   </CardTitle>
                   <CardDescription
-                    className={`transition-colors leading-relaxed ${
-                      isDark ? "text-slate-300 group-hover:text-slate-200" : "text-slate-600 group-hover:text-slate-700"
-                    }`}
+                    className={`transition-colors leading-relaxed ${isDark ? "text-slate-300 group-hover:text-slate-200" : "text-slate-600 group-hover:text-slate-700"
+                      }`}
                   >
                     {project.description}
                   </CardDescription>
@@ -659,11 +639,10 @@ export default function WorkingPortfolio() {
                       <Badge
                         key={tag}
                         variant="outline"
-                        className={`hover:scale-110 transition-all duration-200 magnetic ${
-                          isDark
+                        className={`hover:scale-110 transition-all duration-200 magnetic ${isDark
                             ? "border-slate-600 text-slate-300 hover:border-blue-400 hover:text-blue-400 hover:bg-blue-400/10"
                             : "border-slate-300 text-slate-600 hover:border-blue-500 hover:text-blue-600 hover:bg-blue-50"
-                        }`}
+                          }`}
                       >
                         {tag}
                       </Badge>
@@ -679,18 +658,16 @@ export default function WorkingPortfolio() {
       {/* Contact Section */}
       <section
         id="contact"
-        className={`py-20 px-6 lg:px-8 relative ${
-          isDark
+        className={`py-20 px-6 lg:px-8 relative ${isDark
             ? "bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950"
             : "bg-gradient-to-br from-slate-100 via-blue-100 to-purple-100"
-        }`}
+          }`}
       >
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-16">
             <h2
-              className={`text-5xl font-bold mb-4 bg-gradient-to-r ${
-                isDark ? "from-white via-blue-200 to-purple-200" : "from-slate-900 via-blue-700 to-purple-700"
-              } bg-clip-text text-transparent`}
+              className={`text-5xl font-bold mb-4 bg-gradient-to-r ${isDark ? "from-white via-blue-200 to-purple-200" : "from-slate-900 via-blue-700 to-purple-700"
+                } bg-clip-text text-transparent`}
             >
               Let's Create Something Amazing
             </h2>
@@ -700,9 +677,8 @@ export default function WorkingPortfolio() {
           </div>
 
           <Card
-            className={`backdrop-blur-xl border relative overflow-hidden transform hover:scale-105 transition-all duration-500 ${
-              isDark ? "bg-slate-900/30 border-slate-800/50" : "bg-white/80 border-slate-200/50"
-            }`}
+            className={`backdrop-blur-xl border relative overflow-hidden transform hover:scale-105 transition-all duration-500 ${isDark ? "bg-slate-900/30 border-slate-800/50" : "bg-white/80 border-slate-200/50"
+              }`}
           >
             <CardContent className="p-12">
               <div className="grid md:grid-cols-2 gap-12">
@@ -735,11 +711,10 @@ export default function WorkingPortfolio() {
                             {contact.label}
                           </p>
                           <p
-                            className={`transition-colors ${
-                              isDark
+                            className={`transition-colors ${isDark
                                 ? "text-slate-300 group-hover:text-white"
                                 : "text-slate-600 group-hover:text-slate-900"
-                            }`}
+                              }`}
                           >
                             {contact.value}
                           </p>
@@ -759,11 +734,10 @@ export default function WorkingPortfolio() {
                       </label>
                       <input
                         type="text"
-                        className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${
-                          isDark
+                        className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${isDark
                             ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                             : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
-                        }`}
+                          }`}
                         placeholder="John"
                       />
                     </div>
@@ -775,11 +749,10 @@ export default function WorkingPortfolio() {
                       </label>
                       <input
                         type="text"
-                        className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${
-                          isDark
+                        className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${isDark
                             ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                             : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
-                        }`}
+                          }`}
                         placeholder="Doe"
                       />
                     </div>
@@ -791,11 +764,10 @@ export default function WorkingPortfolio() {
                     </label>
                     <input
                       type="email"
-                      className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${
-                        isDark
+                      className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${isDark
                           ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                           : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
-                      }`}
+                        }`}
                       placeholder="john@example.com"
                     />
                   </div>
@@ -806,11 +778,10 @@ export default function WorkingPortfolio() {
                     </label>
                     <textarea
                       rows={4}
-                      className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm resize-none ${
-                        isDark
+                      className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm resize-none ${isDark
                           ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                           : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
-                      }`}
+                        }`}
                       placeholder="Tell me about your project vision..."
                     />
                   </div>
@@ -832,11 +803,10 @@ export default function WorkingPortfolio() {
       {showScrollTop && (
         <Button
           onClick={scrollToTop}
-          className={`fixed bottom-8 right-8 z-40 rounded-full w-12 h-12 magnetic transform hover:scale-110 transition-all duration-300 ${
-            isDark
+          className={`fixed bottom-8 right-8 z-40 rounded-full w-12 h-12 magnetic transform hover:scale-110 transition-all duration-300 ${isDark
               ? "bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
               : "bg-white hover:bg-slate-50 text-slate-900 border border-slate-200"
-          } shadow-lg hover:shadow-xl`}
+            } shadow-lg hover:shadow-xl`}
         >
           <ChevronUp className="h-5 w-5" />
         </Button>
@@ -844,9 +814,8 @@ export default function WorkingPortfolio() {
 
       {/* Footer */}
       <footer
-        className={`py-12 px-6 lg:px-8 border-t ${
-          isDark ? "bg-slate-900 text-white border-slate-800" : "bg-slate-50 text-slate-900 border-slate-200"
-        }`}
+        className={`py-12 px-6 lg:px-8 border-t ${isDark ? "bg-slate-900 text-white border-slate-800" : "bg-slate-50 text-slate-900 border-slate-200"
+          }`}
       >
         <div className="max-w-7xl mx-auto text-center">
           <p className={isDark ? "text-slate-400" : "text-slate-600"}>

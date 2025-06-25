@@ -78,14 +78,14 @@ export default function UltraModernPortfolio() {
         className="fixed w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full pointer-events-none z-50 mix-blend-difference transition-all duration-100"
         style={{ transform: 'translate(-50%, -50%)' }}
       />
-      
+
       {/* Cursor Trail */}
       {[...Array(5)].map((_, i) => (
         <div
           key={i}
           ref={el => { if (el) trailRef.current[i] = el }}
           className="fixed w-2 h-2 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full pointer-events-none z-40 opacity-50"
-          style={{ 
+          style={{
             transform: 'translate(-50%, -50%)',
             transition: `all ${(i + 1) * 100}ms ease-out`
           }}
@@ -94,7 +94,7 @@ export default function UltraModernPortfolio() {
 
       {/* Animated Mesh Background */}
       <div className="fixed inset-0 opacity-30">
-        <div 
+        <div
           className="absolute inset-0 bg-gradient-to-br from-blue-900/20 via-purple-900/20 to-pink-900/20"
           style={{
             transform: `translate(${mousePosition.x * 0.01}px, ${mousePosition.y * 0.01}px)`,
@@ -116,13 +116,12 @@ export default function UltraModernPortfolio() {
               animationDuration: `${20 + Math.random() * 10}s`,
             }}
           >
-            <div 
-              className={`w-6 h-6 rounded-full blur-sm ${
-                i % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-cyan-400' :
-                i % 4 === 1 ? 'bg-gradient-to-r from-purple-400 to-pink-400' :
-                i % 4 === 2 ? 'bg-gradient-to-r from-pink-400 to-red-400' :
-                'bg-gradient-to-r from-yellow-400 to-orange-400'
-              }`}
+            <div
+              className={`w-6 h-6 rounded-full blur-sm ${i % 4 === 0 ? 'bg-gradient-to-r from-blue-400 to-cyan-400' :
+                  i % 4 === 1 ? 'bg-gradient-to-r from-purple-400 to-pink-400' :
+                    i % 4 === 2 ? 'bg-gradient-to-r from-pink-400 to-red-400' :
+                      'bg-gradient-to-r from-yellow-400 to-orange-400'
+                }`}
             />
           </div>
         ))}
@@ -146,7 +145,7 @@ export default function UltraModernPortfolio() {
                   {item}
                   <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 group-hover:w-full transition-all duration-500 ease-out" />
                   <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 group-hover:w-full transition-all duration-700 ease-out delay-100" />
-                  
+
                   {/* Hover glow effect */}
                   <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-400/10 to-purple-400/10 scale-0 group-hover:scale-100 transition-transform duration-300 -z-10" />
                 </Link>
@@ -157,9 +156,9 @@ export default function UltraModernPortfolio() {
       </nav>
 
       {/* Ultra Modern Hero Section */}
-      <section 
+      <section
         ref={heroRef}
-        id="home" 
+        id="home"
         className="pt-24 pb-16 px-6 lg:px-8 min-h-screen flex items-center relative"
         style={{
           transform: `translateY(${scrollY * 0.3}px)`,
@@ -195,14 +194,14 @@ export default function UltraModernPortfolio() {
 
               {/* Enhanced Description */}
               <p className="text-xl text-slate-300 mb-12 leading-relaxed max-w-2xl animate-fade-in-up opacity-0" style={{ animationDelay: '1.1s', animationFillMode: 'forwards' }}>
-                I design and develop cutting-edge digital experiences that push the boundaries of what's possible. 
+                I design and develop cutting-edge digital experiences that push the boundaries of what's possible.
                 Specializing in immersive interfaces, AI integration, and next-generation web technologies.
               </p>
 
               {/* Premium CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-6 animate-fade-in-up opacity-0" style={{ animationDelay: '1.3s', animationFillMode: 'forwards' }}>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="group relative overflow-hidden bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:via-purple-600 hover:to-pink-600 text-white border-0 transform hover:scale-105 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/25 px-8 py-4 text-lg font-semibold"
                 >
                   <span className="relative z-10 flex items-center">
@@ -210,7 +209,7 @@ export default function UltraModernPortfolio() {
                     <Rocket className="ml-3 h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
+
                   {/* Animated particles */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                     {[...Array(8)].map((_, i) => (
@@ -226,10 +225,10 @@ export default function UltraModernPortfolio() {
                     ))}
                   </div>
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="lg" 
+
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="group relative overflow-hidden border-2 border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white transform hover:scale-105 transition-all duration-500 hover:shadow-xl bg-slate-900/50 backdrop-blur-sm px-8 py-4 text-lg font-semibold"
                 >
                   <span className="relative z-10 flex items-center">
@@ -263,22 +262,22 @@ export default function UltraModernPortfolio() {
             <div className={`relative transition-all duration-2000 delay-500 ${isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
               <div className="relative group">
                 {/* Main Image Container with Advanced Effects */}
-                <div 
+                <div
                   className="relative w-full h-[700px] rounded-3xl overflow-hidden bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 transform group-hover:scale-105 transition-all duration-700 hover:shadow-2xl hover:shadow-purple-500/20"
                   style={{
                     transform: `perspective(1000px) rotateY(${mousePosition.x * 0.01}deg) rotateX(${mousePosition.y * 0.01}deg)`,
                   }}
                 >
-                  <Image 
-                    src="/placeholder.svg?height=700&width=500" 
-                    alt="Jordan Blake" 
-                    fill 
-                    className="object-cover group-hover:scale-110 transition-transform duration-700 mix-blend-overlay" 
+                  <Image
+                    src="/placeholder.svg?height=700&width=500"
+                    alt="Jordan Blake"
+                    fill
+                    className="object-cover group-hover:scale-110 transition-transform duration-700 mix-blend-overlay"
                   />
-                  
+
                   {/* Dynamic Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-blue-600/30 via-transparent to-purple-600/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
+
                   {/* Interactive UI Elements */}
                   <div className="absolute top-6 left-6 bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 shadow-2xl transform -translate-y-4 group-hover:translate-y-0 transition-transform duration-500 border border-slate-700/50">
                     <div className="flex items-center gap-3">
@@ -290,7 +289,7 @@ export default function UltraModernPortfolio() {
                       <Code2 className="w-4 h-4 text-blue-400" />
                     </div>
                   </div>
-                  
+
                   <div className="absolute bottom-6 right-6 bg-slate-900/80 backdrop-blur-xl rounded-2xl p-4 shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100 border border-slate-700/50">
                     <div className="flex items-center gap-3">
                       <Star className="w-4 h-4 text-yellow-400 animate-spin-slow" />
@@ -316,9 +315,9 @@ export default function UltraModernPortfolio() {
                 <div className="absolute -top-8 -right-8 w-32 h-32 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-pulse-glow opacity-60 blur-xl" />
                 <div className="absolute -bottom-8 -left-8 w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-spin-slow opacity-80" />
                 <div className="absolute top-1/2 -right-12 w-12 h-12 bg-gradient-to-r from-pink-400 to-red-400 rounded-full animate-bounce-3d" />
-                
+
                 {/* Interactive Cursor Follower */}
-                <div 
+                <div
                   className="absolute w-4 h-4 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full opacity-50 pointer-events-none transition-all duration-100"
                   style={{
                     left: `${mousePosition.x * 0.1}px`,
@@ -359,33 +358,33 @@ export default function UltraModernPortfolio() {
               >
                 {/* Animated Background */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${skill.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-                
+
                 {/* Glowing Border Effect */}
                 <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   <div className={`absolute inset-0 rounded-lg bg-gradient-to-r ${skill.color} animate-border-glow p-[1px]`}>
                     <div className="w-full h-full bg-slate-900 rounded-lg" />
                   </div>
                 </div>
-                
+
                 <CardContent className="p-8 relative z-10">
                   {/* Icon with Advanced Animation */}
                   <div className={`w-20 h-20 bg-gradient-to-r ${skill.color} rounded-3xl mb-6 flex items-center justify-center text-3xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-500 mx-auto shadow-2xl group-hover:shadow-xl relative overflow-hidden`}>
                     <span className="relative z-10">{skill.icon}</span>
                     <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   </div>
-                  
+
                   <h3 className="font-bold text-white mb-2 text-xl text-center group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
                     {skill.name}
                   </h3>
-                  
+
                   <p className="text-sm text-slate-400 mb-2 text-center group-hover:text-slate-300 transition-colors">
                     {skill.description}
                   </p>
-                  
+
                   <p className="text-xs text-slate-500 mb-6 text-center">
                     {skill.projects} projects
                   </p>
-                  
+
                   {/* Advanced Progress Visualization */}
                   <div className="relative h-3 bg-slate-800 rounded-full overflow-hidden mb-4">
                     <div
@@ -396,7 +395,7 @@ export default function UltraModernPortfolio() {
                       <div className="absolute right-0 top-0 w-2 h-full bg-white/50 animate-pulse" />
                     </div>
                   </div>
-                  
+
                   <div className="text-center text-lg font-bold text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
                     {skill.level}%
                   </div>
@@ -470,23 +469,23 @@ export default function UltraModernPortfolio() {
                         fill
                         className="object-cover group-hover:scale-110 transition-transform duration-700"
                       />
-                      
+
                       {/* Dynamic Gradient Overlay */}
                       <div className={`absolute inset-0 bg-gradient-to-r ${project.gradient} opacity-0 group-hover:opacity-70 transition-all duration-500`} />
-                      
+
                       {/* Interactive Elements */}
                       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                         <div className="flex gap-6">
-                          <Button 
-                            variant="secondary" 
-                            size="icon" 
+                          <Button
+                            variant="secondary"
+                            size="icon"
                             className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-100 hover:rotate-12"
                           >
                             <Github className="h-6 w-6 text-white" />
                           </Button>
-                          <Button 
-                            variant="secondary" 
-                            size="icon" 
+                          <Button
+                            variant="secondary"
+                            size="icon"
                             className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-xl border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-200 hover:-rotate-12"
                           >
                             <ExternalLink className="h-6 w-6 text-white" />
@@ -512,17 +511,17 @@ export default function UltraModernPortfolio() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className={index % 2 === 1 ? 'lg:col-start-1' : ''}>
                   <div className="space-y-6">
                     <h3 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
                       {project.title}
                     </h3>
-                    
+
                     <p className="text-lg text-slate-300 leading-relaxed">
                       {project.description}
                     </p>
-                    
+
                     <div className="flex flex-wrap gap-3">
                       {project.tags.map((tag, tagIndex) => (
                         <Badge
@@ -534,9 +533,9 @@ export default function UltraModernPortfolio() {
                         </Badge>
                       ))}
                     </div>
-                    
-                    <Button 
-                      variant="ghost" 
+
+                    <Button
+                      variant="ghost"
                       className="group/btn text-slate-300 hover:text-white p-0 h-auto font-medium text-lg mt-6"
                     >
                       Explore Project
@@ -573,7 +572,7 @@ export default function UltraModernPortfolio() {
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-border-flow p-[1px] rounded-lg">
               <div className="w-full h-full bg-slate-900/90 rounded-lg" />
             </div>
-            
+
             <CardContent className="p-12 relative z-10">
               <div className="grid md:grid-cols-2 gap-12">
                 {/* Contact Info */}

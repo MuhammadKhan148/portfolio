@@ -42,7 +42,7 @@ export default function Interactive3DPortfolio() {
     <div className="min-h-screen bg-slate-900 text-white overflow-hidden relative">
       {/* 3D Background Grid */}
       <div className="fixed inset-0 opacity-20">
-        <div 
+        <div
           className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20"
           style={{
             transform: `perspective(1000px) rotateX(${mousePosition.y * 5}deg) rotateY(${mousePosition.x * 5}deg)`,
@@ -94,9 +94,9 @@ export default function Interactive3DPortfolio() {
       </nav>
 
       {/* Hero Section with 3D Effects */}
-      <section 
+      <section
         ref={heroRef}
-        id="home" 
+        id="home"
         className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 relative min-h-screen flex items-center"
         style={{
           transform: `translateY(${scrollY * 0.5}px)`,
@@ -104,7 +104,7 @@ export default function Interactive3DPortfolio() {
       >
         <div className="max-w-6xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div 
+            <div
               className={`transition-all duration-1000 delay-300 ${isLoaded ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'}`}
               style={{
                 transform: `perspective(1000px) rotateY(${mousePosition.x * 10}deg) rotateX(${mousePosition.y * 5}deg)`,
@@ -124,15 +124,15 @@ export default function Interactive3DPortfolio() {
                   <Sparkles className="w-8 h-8 text-yellow-400" />
                 </div>
               </div>
-              
+
               <p className="text-xl text-slate-300 mb-8 leading-relaxed animate-fade-in-up" style={{ animationDelay: '1s' }}>
-                I create immersive digital experiences that push the boundaries of web technology. 
+                I create immersive digital experiences that push the boundaries of web technology.
                 Specializing in 3D graphics, interactive animations, and cutting-edge UI/UX design.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '1.2s' }}>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transform hover:scale-105 hover:rotate-1 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/25 group relative overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center">
@@ -141,9 +141,9 @@ export default function Interactive3DPortfolio() {
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </Button>
-                <Button 
-                  variant="outline" 
-                  size="lg" 
+                <Button
+                  variant="outline"
+                  size="lg"
                   className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:text-white transform hover:scale-105 hover:-rotate-1 transition-all duration-300 hover:shadow-xl group"
                 >
                   <Download className="mr-2 h-4 w-4 group-hover:animate-bounce" />
@@ -151,22 +151,22 @@ export default function Interactive3DPortfolio() {
                 </Button>
               </div>
             </div>
-            
-            <div 
+
+            <div
               className={`relative transition-all duration-1000 delay-500 ${isLoaded ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}
               style={{
                 transform: `perspective(1000px) rotateY(${-mousePosition.x * 15}deg) rotateX(${-mousePosition.y * 10}deg)`,
               }}
             >
               <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 transform-gpu hover:scale-105 transition-all duration-500 hover:shadow-2xl hover:shadow-purple-500/25">
-                <Image 
-                  src="/placeholder.svg?height=500&width=400" 
-                  alt="Maya Rodriguez" 
-                  fill 
-                  className="object-cover mix-blend-overlay" 
+                <Image
+                  src="/placeholder.svg?height=500&width=400"
+                  alt="Maya Rodriguez"
+                  fill
+                  className="object-cover mix-blend-overlay"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-purple-600/40 via-transparent to-blue-600/40" />
-                
+
                 {/* Floating UI Elements */}
                 <div className="absolute top-4 left-4 bg-white/10 backdrop-blur-md rounded-lg p-3 animate-float-ui">
                   <div className="flex items-center gap-2">
@@ -174,12 +174,12 @@ export default function Interactive3DPortfolio() {
                     <span className="text-xs text-white">Online</span>
                   </div>
                 </div>
-                
+
                 <div className="absolute bottom-4 right-4 bg-white/10 backdrop-blur-md rounded-lg p-3 animate-float-ui-delayed">
                   <MousePointer className="w-5 h-5 text-blue-400" />
                 </div>
               </div>
-              
+
               {/* 3D Floating Elements */}
               <div className="absolute -top-8 -right-8 w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full animate-orbit" />
               <div className="absolute -bottom-8 -left-8 w-12 h-12 bg-gradient-to-r from-green-400 to-blue-400 rounded-full animate-orbit-reverse" />
@@ -195,7 +195,7 @@ export default function Interactive3DPortfolio() {
           <h2 className="text-4xl font-bold text-center mb-16 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             Interactive Skills
           </h2>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { name: 'Three.js', level: 95, icon: '🎮', color: 'from-blue-500 to-cyan-500' },
@@ -206,19 +206,19 @@ export default function Interactive3DPortfolio() {
               <Card
                 key={skill.name}
                 className="group relative bg-slate-800/50 border-slate-700 hover:bg-slate-800 transition-all duration-500 hover:-translate-y-4 hover:rotate-3 transform-gpu animate-fade-in-up cursor-pointer overflow-hidden"
-                style={{ 
+                style={{
                   animationDelay: `${index * 0.1}s`,
                   transform: `perspective(1000px) rotateX(${mousePosition.y * 2}deg) rotateY(${mousePosition.x * 2}deg)`,
                 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
+
                 <CardContent className="p-6 relative z-10">
                   <div className={`w-16 h-16 bg-gradient-to-r ${skill.color} rounded-xl mb-4 flex items-center justify-center text-2xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-300 mx-auto`}>
                     {skill.icon}
                   </div>
                   <h3 className="font-bold text-white mb-3 text-center group-hover:text-blue-400 transition-colors">{skill.name}</h3>
-                  
+
                   {/* 3D Progress Bar */}
                   <div className="relative h-3 bg-slate-700 rounded-full overflow-hidden">
                     <div
@@ -232,7 +232,7 @@ export default function Interactive3DPortfolio() {
                     {skill.level}%
                   </div>
                 </CardContent>
-                
+
                 {/* Floating particles */}
                 <div className="absolute inset-0 pointer-events-none">
                   {[...Array(5)].map((_, i) => (
@@ -295,20 +295,20 @@ export default function Interactive3DPortfolio() {
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                   <div className={`absolute inset-0 bg-gradient-to-r ${project.gradient} opacity-0 group-hover:opacity-60 transition-all duration-500`} />
-                  
+
                   {/* 3D Overlay Elements */}
                   <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center">
                     <div className="flex gap-4">
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
+                      <Button
+                        variant="secondary"
+                        size="icon"
                         className="rounded-full bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-100 hover:rotate-12"
                       >
                         <Github className="h-4 w-4 text-white" />
                       </Button>
-                      <Button 
-                        variant="secondary" 
-                        size="icon" 
+                      <Button
+                        variant="secondary"
+                        size="icon"
                         className="rounded-full bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-200 hover:-rotate-12"
                       >
                         <ExternalLink className="h-4 w-4 text-white" />
@@ -316,7 +316,7 @@ export default function Interactive3DPortfolio() {
                     </div>
                   </div>
                 </div>
-                
+
                 <CardHeader className="relative z-10">
                   <CardTitle className="text-white group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 group-hover:bg-clip-text transition-all duration-300">
                     {project.title}
@@ -325,7 +325,7 @@ export default function Interactive3DPortfolio() {
                     {project.description}
                   </CardDescription>
                 </CardHeader>
-                
+
                 <CardContent className="relative z-10">
                   <div className="flex flex-wrap gap-2">
                     {project.tags.map((tag, tagIndex) => (
@@ -340,7 +340,7 @@ export default function Interactive3DPortfolio() {
                     ))}
                   </div>
                 </CardContent>
-                
+
                 {/* Animated border */}
                 <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                   <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-border-flow" style={{ padding: '2px' }}>
@@ -363,14 +363,14 @@ export default function Interactive3DPortfolio() {
             <p className="text-xl text-slate-300">Ready to build something extraordinary?</p>
           </div>
 
-          <Card 
+          <Card
             className="bg-slate-800/30 border-slate-700 backdrop-blur-xl relative overflow-hidden transform-gpu hover:scale-105 transition-all duration-500"
             style={{
               transform: `perspective(1000px) rotateX(${mousePosition.y * 2}deg) rotateY(${mousePosition.x * 2}deg)`,
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10" />
-            
+
             <CardContent className="p-8 relative z-10">
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
