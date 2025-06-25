@@ -26,6 +26,22 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 
+// Portfolio Data from portfolio.md
+const portfolioData = {
+  name: "Muhammad Abdullah Khan",
+  title: "AI-Focused Software Engineer & Full-Stack Developer",
+  bio: "AI-Focused Software Engineer & Full-Stack Developer specializing in emotion-aware systems, conversational AI, and scalable web applications. Creator of 24+ open-source projects with 100% ★5 freelance record.",
+  email: "muhammad.mak252@gmail.com",
+  github: "https://github.com/MuhammadKhan148",
+  linkedin: "https://linkedin.com/in/muhammad-abdullah-khan-01271a263/",
+  stats: {
+    projects: "24+",
+    rating: "100%",
+    clients: "60+",
+    experience: "6+ Years"
+  }
+}
+
 // Custom hook for intersection observer
 const useIntersectionObserver = (options = {}) => {
   const [isIntersecting, setIsIntersecting] = useState(false)
@@ -441,36 +457,35 @@ export default function UltimatePortfolio() {
               </div>
 
               {/* Enhanced Typography */}
-              <h1 className="text-6xl lg:text-7xl font-bold mb-8 leading-tight">
+              <h1 className="text-5xl lg:text-6xl font-bold mb-8 leading-tight">
                 <span
                   className={`inline-block animate-slide-up opacity-0 ${isDark ? "text-white" : "text-slate-900"}`}
                   style={{ animationDelay: "0.5s", animationFillMode: "forwards" }}
                 >
-                  Creative
+                  AI-Focused
                 </span>
                 <br />
                 <span
                   className="inline-block animate-slide-up opacity-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
                   style={{ animationDelay: "0.7s", animationFillMode: "forwards" }}
                 >
-                  Developer
+                  Software Engineer
                 </span>
                 <br />
                 <span
                   className={`inline-block animate-slide-up opacity-0 ${isDark ? "text-slate-400" : "text-slate-600"}`}
                   style={{ animationDelay: "0.9s", animationFillMode: "forwards" }}
                 >
-                  & Designer
+                  & Full-Stack Developer
                 </span>
               </h1>
 
               <p
-                className={`text-xl mb-10 leading-relaxed max-w-lg animate-fade-in-up opacity-0 ${isDark ? "text-slate-300" : "text-slate-600"
+                className={`text-xl mb-10 leading-relaxed max-w-3xl animate-fade-in-up opacity-0 ${isDark ? "text-slate-300" : "text-slate-600"
                   }`}
                 style={{ animationDelay: "1.1s", animationFillMode: "forwards" }}
               >
-                I craft exceptional digital experiences that blend beautiful design with cutting-edge technology.
-                Passionate about creating solutions that make a real impact.
+                {portfolioData.bio}
               </p>
 
               {/* Enhanced CTA Buttons */}
@@ -858,12 +873,12 @@ export default function UltimatePortfolio() {
                   </h3>
                   <div className="space-y-6">
                     {[
-                      { icon: Mail, label: "Email", value: "muhammad.mak252@gmail.com", color: "from-blue-400 to-blue-600" },
+                      { icon: Mail, label: "Email", value: portfolioData.email, color: "from-blue-400 to-blue-600" },
                       { icon: Github, label: "GitHub", value: "@MuhammadKhan148", color: "from-slate-400 to-slate-600" },
                       {
                         icon: Linkedin,
                         label: "LinkedIn",
-                        value: "/in/muhammad-abdullah-khan",
+                        value: "/in/muhammad-abdullah-khan-01271a263/",
                         color: "from-blue-500 to-blue-700",
                       },
                     ].map((contact, index) => (
