@@ -418,8 +418,7 @@ export default function UltimatePortfolio() {
         <div className="max-w-7xl mx-auto w-full">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div
-              className={`transition-all duration-1500 ${heroHasIntersected ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0"
-                }`}
+              className="translate-x-0 opacity-100 transition-all duration-1500"
             >
               {/* Status Badge with Better Animation */}
               <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-green-500/10 to-blue-500/10 backdrop-blur-xl border border-green-500/20 rounded-full mb-8 animate-fade-in-up group hover:scale-105 transition-all duration-300 magnetic">
@@ -439,39 +438,33 @@ export default function UltimatePortfolio() {
               {/* Enhanced Typography */}
               <h1 className="text-5xl lg:text-6xl font-bold mb-8 leading-tight">
                 <span
-                  className={`inline-block animate-slide-up opacity-0 ${isDark ? "text-white" : "text-slate-900"}`}
-                  style={{ animationDelay: "0.5s", animationFillMode: "forwards" }}
+                  className={`inline-block ${isDark ? "text-white" : "text-slate-900"}`}
                 >
                   AI-Focused
                 </span>
                 <br />
                 <span
-                  className="inline-block animate-slide-up opacity-0 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
-                  style={{ animationDelay: "0.7s", animationFillMode: "forwards" }}
+                  className="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent"
                 >
                   Software Engineer
                 </span>
                 <br />
                 <span
-                  className={`inline-block animate-slide-up opacity-0 ${isDark ? "text-slate-400" : "text-slate-600"}`}
-                  style={{ animationDelay: "0.9s", animationFillMode: "forwards" }}
+                  className={`inline-block ${isDark ? "text-slate-400" : "text-slate-600"}`}
                 >
                   & Full-Stack Developer
                 </span>
               </h1>
 
               <p
-                className={`text-xl mb-10 leading-relaxed max-w-3xl animate-fade-in-up opacity-0 ${isDark ? "text-slate-300" : "text-slate-600"
-                  }`}
-                style={{ animationDelay: "1.1s", animationFillMode: "forwards" }}
+                className={`text-xl mb-10 leading-relaxed max-w-3xl ${isDark ? "text-slate-300" : "text-slate-600"}`}
               >
                 {portfolioData.bio}
               </p>
 
               {/* Enhanced CTA Buttons */}
               <div
-                className="flex flex-col sm:flex-row gap-4 animate-fade-in-up opacity-0"
-                style={{ animationDelay: "1.3s", animationFillMode: "forwards" }}
+                className="flex flex-col sm:flex-row gap-4"
               >
                 <Button
                   size="lg"
@@ -503,8 +496,7 @@ export default function UltimatePortfolio() {
 
               {/* Social Links */}
               <div
-                className="flex items-center gap-4 mt-12 animate-fade-in-up opacity-0"
-                style={{ animationDelay: "1.5s", animationFillMode: "forwards" }}
+                className="flex items-center gap-4 mt-12"
               >
                 <span className={`text-sm mr-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Follow me:</span>
                 {[
@@ -528,8 +520,7 @@ export default function UltimatePortfolio() {
 
             {/* Enhanced Hero Image */}
             <div
-              className={`relative transition-all duration-1500 delay-500 ${heroHasIntersected ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
-                }`}
+              className="relative translate-x-0 opacity-100 transition-all duration-1500"
             >
               <div className="relative group magnetic">
                 <div
@@ -592,8 +583,7 @@ export default function UltimatePortfolio() {
       >
         <div className="max-w-7xl mx-auto">
           <div
-            className={`text-center mb-16 transition-all duration-1000 ${skillsHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-              }`}
+            className="text-center mb-16 translate-y-0 opacity-100 transition-all duration-1000"
           >
             <h2 className={`text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
               Skills & Expertise
@@ -636,10 +626,9 @@ export default function UltimatePortfolio() {
             ].map((skill, index) => (
               <Card
                 key={skill.name}
-                className={`group relative backdrop-blur-sm border transition-all duration-700 hover:-translate-y-4 hover:shadow-2xl magnetic overflow-hidden ${skillsHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-                  } ${isDark
-                    ? "bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50"
-                    : "bg-white/80 border-slate-200/50 hover:border-slate-300/50"
+                className={`group relative backdrop-blur-sm border transition-all duration-700 hover:-translate-y-4 hover:shadow-2xl magnetic overflow-hidden translate-y-0 opacity-100 ${isDark
+                  ? "bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50"
+                  : "bg-white/80 border-slate-200/50 hover:border-slate-300/50"
                   }`}
                 style={{ transitionDelay: `${index * 0.1}s` }}
                 onMouseEnter={() => setCursorVariant("hover")}
@@ -699,8 +688,7 @@ export default function UltimatePortfolio() {
       <section ref={projectsRef} id="work" className="py-20 px-6 lg:px-8 relative">
         <div className="max-w-7xl mx-auto">
           <div
-            className={`text-center mb-16 transition-all duration-1000 ${projectsHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-              }`}
+            className="text-center mb-16 translate-y-0 opacity-100 transition-all duration-1000"
           >
             <h2 className={`text-5xl font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>Featured Projects</h2>
             <p className={`text-xl ${isDark ? "text-slate-300" : "text-slate-600"}`}>
@@ -737,10 +725,9 @@ export default function UltimatePortfolio() {
               gitHubProjects.slice(0, 4).map((project, index) => (
                 <Card
                   key={project.title}
-                  className={`group relative backdrop-blur-sm border transition-all duration-700 hover:shadow-2xl magnetic overflow-hidden ${projectsHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-                    } ${isDark
-                      ? "bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50"
-                      : "bg-white/80 border-slate-200/50 hover:border-slate-300/50"
+                  className={`group relative backdrop-blur-sm border transition-all duration-700 hover:shadow-2xl magnetic overflow-hidden translate-y-0 opacity-100 ${isDark
+                    ? "bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50"
+                    : "bg-white/80 border-slate-200/50 hover:border-slate-300/50"
                     }`}
                   style={{ transitionDelay: `${index * 0.2}s` }}
                   onMouseEnter={() => setCursorVariant("hover")}
@@ -843,8 +830,7 @@ export default function UltimatePortfolio() {
       >
         <div className="max-w-4xl mx-auto">
           <div
-            className={`text-center mb-16 transition-all duration-1000 ${contactHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-              }`}
+            className="text-center mb-16 translate-y-0 opacity-100 transition-all duration-1000"
           >
             <h2
               className={`text-5xl font-bold mb-4 bg-gradient-to-r ${isDark ? "from-white via-blue-200 to-purple-200" : "from-slate-900 via-blue-700 to-purple-700"
@@ -858,8 +844,7 @@ export default function UltimatePortfolio() {
           </div>
 
           <Card
-            className={`backdrop-blur-xl border relative overflow-hidden transform hover:scale-105 transition-all duration-500 ${contactHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
-              } ${isDark ? "bg-slate-900/30 border-slate-800/50" : "bg-white/80 border-slate-200/50"}`}
+            className={`backdrop-blur-xl border relative overflow-hidden transform hover:scale-105 transition-all duration-500 translate-y-0 opacity-100 ${isDark ? "bg-slate-900/30 border-slate-800/50" : "bg-white/80 border-slate-200/50"}`}
           >
             <CardContent className="p-12">
               <div className="grid md:grid-cols-2 gap-12">
