@@ -122,6 +122,9 @@ export default function UltimatePortfolio() {
   const [gitHubProjects, setGitHubProjects] = useState<any[]>([])
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
 
+  // Debug logging
+  console.log('Component rendering, isLoading:', isLoading)
+
   const cursorRef = useRef<HTMLDivElement>(null)
   const magneticRefs = useRef<HTMLElement[]>([])
 
@@ -132,12 +135,23 @@ export default function UltimatePortfolio() {
   const [projectsRef, projectsInView, projectsHasIntersected] = useIntersectionObserver()
   const [contactRef, contactInView, contactHasIntersected] = useIntersectionObserver()
 
-  // Loading simulation
+  // Loading simulation - reduced time with fallback
   useEffect(() => {
     const timer = setTimeout(() => {
+      console.log('Setting isLoading to false')
       setIsLoading(false)
-    }, 3000)
-    return () => clearTimeout(timer)
+    }, 1500)
+
+    // Fallback in case something goes wrong
+    const fallbackTimer = setTimeout(() => {
+      console.log('Fallback: forcing load complete')
+      setIsLoading(false)
+    }, 5000)
+
+    return () => {
+      clearTimeout(timer)
+      clearTimeout(fallbackTimer)
+    }
   }, [])
 
   // GitHub Projects Loading
@@ -227,11 +241,6 @@ export default function UltimatePortfolio() {
 
     setMousePosition({ x, y })
 
-    // Update cursor position
-    if (cursorRef.current) {
-      cursorRef.current.style.transform = `translate(${x}px, ${y}px)`
-    }
-
     // Magnetic effect for buttons
     magneticRefs.current.forEach((el) => {
       if (el) {
@@ -283,24 +292,26 @@ export default function UltimatePortfolio() {
   }
 
   if (isLoading) {
-    return <LoadingScreen isLoading={isLoading} />
+    return (
+      <div>
+        <LoadingScreen isLoading={isLoading} />
+        {/* Debug button to skip loading */}
+        <button
+          onClick={() => setIsLoading(false)}
+          className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded"
+          style={{ zIndex: 9999 }}
+        >
+          Skip Loading (Debug)
+        </button>
+      </div>
+    )
   }
 
   return (
     <div
       className={`min-h-screen transition-colors duration-500 ${isDark ? "bg-slate-950 text-white" : "bg-white text-slate-900"}`}
     >
-      {/* Enhanced Custom Cursor */}
-      <div
-        ref={cursorRef}
-        className={`fixed w-6 h-6 pointer-events-none z-50 mix-blend-difference transition-all duration-200 ${cursorVariant === "hover"
-          ? "scale-150 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full"
-          : cursorVariant === "click"
-            ? "scale-75 bg-red-400 rounded-full"
-            : "scale-100 bg-white rounded-full"
-          }`}
-        style={{ transform: "translate(-50%, -50%)" }}
-      />
+
 
       {/* Enhanced Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
