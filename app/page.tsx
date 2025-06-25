@@ -162,6 +162,13 @@ export default function UltimatePortfolio() {
   const [cursorVariant, setCursorVariant] = useState("default")
   const [gitHubProjects, setGitHubProjects] = useState<any[]>([])
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    message: ''
+  })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const cursorRef = useRef<HTMLDivElement>(null)
   const trailRef = useRef<HTMLDivElement[]>([])
@@ -238,7 +245,7 @@ export default function UltimatePortfolio() {
           const scoreB = (b.stargazers_count || 0) * 3 + (b.forks_count || 0) * 2 + (new Date(b.pushed_at).getTime() / 1000000000)
           return scoreB - scoreA
         })
-        .slice(0, 18) // Show more projects (increased from 12 to 18)
+        // Show ALL repositories (removed limit)
         .map((repo: any) => ({
           id: repo.id.toString(),
           title: repo.name.replace(/-/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
@@ -329,6 +336,59 @@ export default function UltimatePortfolio() {
 
   const toggleTheme = () => {
     setIsDark(!isDark)
+  }
+
+  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsSubmitting(true)
+
+    try {
+      // Create mailto link with pre-filled content
+      const subject = encodeURIComponent(`Portfolio Contact: ${formData.firstName} ${formData.lastName}`)
+      const body = encodeURIComponent(`
+Hello Muhammad,
+
+My name is ${formData.firstName} ${formData.lastName} and I'm reaching out through your portfolio.
+
+Email: ${formData.email}
+
+Project Details:
+${formData.message}
+
+Best regards,
+${formData.firstName} ${formData.lastName}
+      `.trim())
+
+      const mailtoLink = `mailto:${portfolioData.email}?subject=${subject}&body=${body}`
+
+      // Open default email client
+      window.open(mailtoLink, '_self')
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        message: ''
+      })
+
+      // Show success message (you could add a toast notification here)
+      alert('Email client opened! Please send the email to complete your message.')
+
+    } catch (error) {
+      console.error('Error submitting form:', error)
+      alert('Error submitting form. Please try again or email directly at ' + portfolioData.email)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (isLoading) {
@@ -786,7 +846,7 @@ export default function UltimatePortfolio() {
                   >
                     <div
                       className={`h-full bg-gradient-to-r ${skill.color} rounded-full transition-all duration-1000 ease-out relative group-hover:animate-pulse`}
-                      style={{ width: skillsInView ? `${skill.level}%` : "0%" }}
+                      style={{ width: `${skill.level}%` }}
                     >
                       <div className="absolute inset-0 bg-white/30 animate-shimmer" />
                     </div>
@@ -950,7 +1010,7 @@ export default function UltimatePortfolio() {
                 </Card>
               ))
             ) : (
-              gitHubProjects.slice(0, 4).map((project, index) => (
+              gitHubProjects.slice(0, 12).map((project, index) => (
                 <Card
                   key={project.title}
                   className={`group relative backdrop-blur-sm border transition-all duration-700 hover:shadow-2xl magnetic overflow-hidden translate-y-0 opacity-100 ${isDark
@@ -1124,7 +1184,7 @@ export default function UltimatePortfolio() {
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <form onSubmit={handleFormSubmit} className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label
@@ -1134,6 +1194,10 @@ export default function UltimatePortfolio() {
                       </label>
                       <input
                         type="text"
+                        name="firstName"
+                        value={formData.firstName}
+                        onChange={handleFormChange}
+                        required
                         className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${isDark
                           ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                           : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
@@ -1149,6 +1213,10 @@ export default function UltimatePortfolio() {
                       </label>
                       <input
                         type="text"
+                        name="lastName"
+                        value={formData.lastName}
+                        onChange={handleFormChange}
+                        required
                         className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${isDark
                           ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                           : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
@@ -1164,6 +1232,10 @@ export default function UltimatePortfolio() {
                     </label>
                     <input
                       type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleFormChange}
+                      required
                       className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm ${isDark
                         ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                         : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
@@ -1178,6 +1250,10 @@ export default function UltimatePortfolio() {
                     </label>
                     <textarea
                       rows={4}
+                      name="message"
+                      value={formData.message}
+                      onChange={handleFormChange}
+                      required
                       className={`w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-300 focus:scale-105 magnetic backdrop-blur-sm resize-none ${isDark
                         ? "bg-slate-800/50 border border-slate-700/50 text-white placeholder-slate-400"
                         : "bg-white/70 border border-slate-300/50 text-slate-900 placeholder-slate-500"
@@ -1187,16 +1263,18 @@ export default function UltimatePortfolio() {
                   </div>
 
                   <Button
-                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 group py-3 text-lg font-medium"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white border-0 magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-xl hover:shadow-purple-500/25 group py-3 text-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                     onMouseEnter={() => setCursorVariant("hover")}
                     onMouseLeave={() => setCursorVariant("default")}
                   >
                     <span className="flex items-center justify-center">
-                      Send Message
+                      {isSubmitting ? 'Sending...' : 'Send Message'}
                       <Rocket className="ml-2 h-5 w-5 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform duration-300" />
                     </span>
                   </Button>
-                </div>
+                </form>
               </div>
             </CardContent>
           </Card>
