@@ -122,9 +122,6 @@ export default function UltimatePortfolio() {
   const [gitHubProjects, setGitHubProjects] = useState<any[]>([])
   const [isLoadingProjects, setIsLoadingProjects] = useState(true)
 
-  // Debug logging
-  console.log('Component rendering, isLoading:', isLoading)
-
   const cursorRef = useRef<HTMLDivElement>(null)
   const magneticRefs = useRef<HTMLElement[]>([])
 
@@ -135,23 +132,12 @@ export default function UltimatePortfolio() {
   const [projectsRef, projectsInView, projectsHasIntersected] = useIntersectionObserver()
   const [contactRef, contactInView, contactHasIntersected] = useIntersectionObserver()
 
-  // Loading simulation - reduced time with fallback
+  // Loading simulation
   useEffect(() => {
     const timer = setTimeout(() => {
-      console.log('Setting isLoading to false')
       setIsLoading(false)
-    }, 1500)
-
-    // Fallback in case something goes wrong
-    const fallbackTimer = setTimeout(() => {
-      console.log('Fallback: forcing load complete')
-      setIsLoading(false)
-    }, 5000)
-
-    return () => {
-      clearTimeout(timer)
-      clearTimeout(fallbackTimer)
-    }
+    }, 3000)
+    return () => clearTimeout(timer)
   }, [])
 
   // GitHub Projects Loading
@@ -212,19 +198,14 @@ export default function UltimatePortfolio() {
         .slice(0, 6)
         .map((repo: any) => ({
           id: repo.id.toString(),
-          title: repo.name
-            .split("-")
-            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" "),
-          description: repo.description || "A GitHub project",
-          image: `https://opengraph.githubassets.com/1/${repo.full_name}`,
-          tags: [...(repo.language ? [repo.language] : []), ...(repo.topics?.slice(0, 4) || [])].filter(Boolean),
+          title: repo.name.replace(/-/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
+          description: repo.description,
+          image: `/placeholder.svg?height=400&width=600`,
+          tech: [repo.language, ...(repo.topics || [])].filter(Boolean).slice(0, 4),
           github: repo.html_url,
           demo: repo.homepage || repo.html_url,
-          featured: repo.stargazers_count > 2 || repo.topics?.includes("featured"),
           stars: repo.stargazers_count,
-          language: repo.language,
-          updated: repo.updated_at,
+          forks: repo.forks_count,
         }))
 
       return portfolioProjects
@@ -292,19 +273,7 @@ export default function UltimatePortfolio() {
   }
 
   if (isLoading) {
-    return (
-      <div>
-        <LoadingScreen isLoading={isLoading} />
-        {/* Debug button to skip loading */}
-        <button
-          onClick={() => setIsLoading(false)}
-          className="fixed top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded"
-          style={{ zIndex: 9999 }}
-        >
-          Skip Loading (Debug)
-        </button>
-      </div>
-    )
+    return <LoadingScreen isLoading={isLoading} />
   }
 
   return (
@@ -366,7 +335,7 @@ export default function UltimatePortfolio() {
             <div
               className={`text-2xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-gradient-flow`}
             >
-              Muhammad Abdullah Khan
+              {portfolioData.name}
             </div>
 
             {/* Desktop Navigation */}
@@ -539,9 +508,9 @@ export default function UltimatePortfolio() {
               >
                 <span className={`text-sm mr-2 ${isDark ? "text-slate-500" : "text-slate-400"}`}>Follow me:</span>
                 {[
-                  { icon: Github, href: "#", color: isDark ? "hover:text-white" : "hover:text-slate-900" },
-                  { icon: Linkedin, href: "#", color: "hover:text-blue-600" },
-                  { icon: Mail, href: "#", color: "hover:text-purple-600" },
+                  { icon: Github, href: portfolioData.github, color: isDark ? "hover:text-white" : "hover:text-slate-900" },
+                  { icon: Linkedin, href: portfolioData.linkedin, color: "hover:text-blue-600" },
+                  { icon: Mail, href: `mailto:${portfolioData.email}`, color: "hover:text-purple-600" },
                 ].map((social, index) => (
                   <Link
                     key={index}
@@ -571,7 +540,7 @@ export default function UltimatePortfolio() {
                 >
                   <Image
                     src="/placeholder.svg?height=600&width=500"
-                    alt="Alex Rivera"
+                    alt={portfolioData.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
                   />
@@ -742,30 +711,30 @@ export default function UltimatePortfolio() {
           <div className="grid lg:grid-cols-2 gap-12">
             {isLoadingProjects ? (
               // Loading state
-              [...Array(2)].map((_, index) => (
+              Array.from({ length: 4 }).map((_, index) => (
                 <Card
                   key={index}
-                  className={`group relative backdrop-blur-sm border animate-pulse ${isDark
+                  className={`backdrop-blur-sm border animate-pulse ${isDark
                     ? "bg-slate-800/50 border-slate-700/50"
                     : "bg-white/80 border-slate-200/50"
                     }`}
                 >
-                  <div className="relative h-64 bg-slate-700 rounded-t-lg"></div>
+                  <div className="h-64 bg-gradient-to-r from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600" />
                   <CardHeader>
-                    <div className="h-6 bg-slate-700 rounded mb-2"></div>
-                    <div className="h-4 bg-slate-700 rounded"></div>
+                    <div className="h-6 bg-slate-200 dark:bg-slate-700 rounded mb-2" />
+                    <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
                   </CardHeader>
                   <CardContent>
                     <div className="flex gap-2 mb-4">
-                      {[...Array(3)].map((_, i) => (
-                        <div key={i} className="h-6 w-16 bg-slate-700 rounded"></div>
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <div key={i} className="h-6 w-16 bg-slate-200 dark:bg-slate-700 rounded" />
                       ))}
                     </div>
                   </CardContent>
                 </Card>
               ))
             ) : (
-              gitHubProjects.slice(0, 2).map((project, index) => (
+              gitHubProjects.slice(0, 4).map((project, index) => (
                 <Card
                   key={project.title}
                   className={`group relative backdrop-blur-sm border transition-all duration-700 hover:shadow-2xl magnetic overflow-hidden ${projectsHasIntersected ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
@@ -786,25 +755,29 @@ export default function UltimatePortfolio() {
                     />
 
                     <div
-                      className={`absolute inset-0 bg-gradient-to-r ${project.gradient} opacity-0 group-hover:opacity-80 transition-all duration-500`}
+                      className={`absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-80 transition-all duration-500`}
                     />
 
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                       <div className="flex gap-4">
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          className="rounded-full bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-100 hover:rotate-12 magnetic"
-                        >
-                          <Github className="h-4 w-4 text-white" />
-                        </Button>
-                        <Button
-                          variant="secondary"
-                          size="icon"
-                          className="rounded-full bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-200 hover:-rotate-12 magnetic"
-                        >
-                          <ExternalLink className="h-4 w-4 text-white" />
-                        </Button>
+                        <Link href={project.github} target="_blank" rel="noopener noreferrer">
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="rounded-full bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-100 hover:rotate-12 magnetic"
+                          >
+                            <Github className="h-4 w-4 text-white" />
+                          </Button>
+                        </Link>
+                        <Link href={project.demo} target="_blank" rel="noopener noreferrer">
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="rounded-full bg-white/20 backdrop-blur-md border-white/30 hover:bg-white/30 transform scale-0 group-hover:scale-100 transition-all duration-300 delay-200 hover:-rotate-12 magnetic"
+                          >
+                            <ExternalLink className="h-4 w-4 text-white" />
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -826,7 +799,7 @@ export default function UltimatePortfolio() {
 
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {project.tags.map((tag: string) => (
+                      {project.tech?.map((tag: string) => (
                         <Badge
                           key={tag}
                           variant="outline"
@@ -838,6 +811,18 @@ export default function UltimatePortfolio() {
                           {tag}
                         </Badge>
                       ))}
+                    </div>
+
+                    {/* GitHub Stats */}
+                    <div className="flex gap-4 text-sm">
+                      <div className="flex items-center gap-1">
+                        <Star className="w-4 h-4" />
+                        <span>{project.stars}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Github className="w-4 h-4" />
+                        <span>{project.forks}</span>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -885,12 +870,12 @@ export default function UltimatePortfolio() {
                   <div className="space-y-6">
                     {[
                       { icon: Mail, label: "Email", value: portfolioData.email, color: "from-blue-400 to-blue-600" },
-                      { icon: Github, label: "GitHub", value: "@MuhammadKhan148", color: "from-slate-400 to-slate-600" },
+                      { icon: Github, label: "GitHub", value: "MuhammadKhan148", color: "from-green-400 to-green-600" },
                       {
                         icon: Linkedin,
                         label: "LinkedIn",
-                        value: "/in/muhammad-abdullah-khan-01271a263/",
-                        color: "from-blue-500 to-blue-700",
+                        value: "Muhammad Abdullah Khan",
+                        color: "from-purple-400 to-purple-600",
                       },
                     ].map((contact, index) => (
                       <div
@@ -1023,7 +1008,7 @@ export default function UltimatePortfolio() {
       >
         <div className="max-w-7xl mx-auto text-center">
           <p className={isDark ? "text-slate-400" : "text-slate-600"}>
-            © 2024 Muhammad Abdullah Khan. AI-focused Software Engineer. All rights reserved.
+            © 2024 Alex Rivera. Crafted with passion and precision. All rights reserved.
           </p>
         </div>
       </footer>
