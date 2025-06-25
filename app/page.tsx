@@ -34,11 +34,52 @@ const portfolioData = {
   email: "muhammad.mak252@gmail.com",
   github: "https://github.com/MuhammadKhan148",
   linkedin: "https://linkedin.com/in/muhammad-abdullah-khan-01271a263/",
+  profile_image: "/images/muhammad-profile.jpg",
+  resume: "/files/Muhammad_Abdullah_Khan_Resume.pdf",
   stats: {
     projects: "24+",
     rating: "100%",
-    clients: "60+",
-    experience: "6+ Years"
+    specialty: "AI/ML Specialist",
+    type: "Full-Stack Developer",
+    approach: "Research-Oriented",
+    quality: "Clean Code"
+  },
+  experience: [
+    {
+      title: "Freelance Full-Stack & AI Developer",
+      company: "Fiverr",
+      duration: "Jan 2018 – Present",
+      location: "Remote",
+      description: "Built production-grade web & mobile apps (MERN, Flutter/Firebase) for global clients. Integrated sentiment-analysis pipelines and custom recommenders, boosting engagement ≈35%.",
+      achievements: [
+        "Completed 60+ contracts with zero revisions on 80% of orders",
+        "Applied research-style A/B testing and model benchmarks",
+        "Built emotion-aware systems adopted by two client startups"
+      ]
+    },
+    {
+      title: "Lab Demonstrator",
+      company: "Programming Fundamentals (PF), FAST-NUCES",
+      duration: "Feb 2024 – Present",
+      location: "Islamabad, Pakistan",
+      description: "Lead weekly C/C++ lab sessions (~120 first-year students); design and grade assignments & quizzes.",
+      achievements: [
+        "Built automated grading script cutting marking time by 40%",
+        "Improved feedback consistency across all students",
+        "Mentored students in coding fundamentals and best practices"
+      ]
+    }
+  ],
+  skills: {
+    ai_ml: ["Python", "TensorFlow", "PyTorch", "Scikit-learn", "Pandas", "NumPy", "OpenCV", "Hugging Face", "Sentiment Analysis", "Natural Language Processing", "Computer Vision", "Deep Learning", "Recommender Systems", "Machine Learning", "Data Science", "Neural Networks", "GPT Integration", "LangChain"],
+    frontend: ["React", "Next.js", "Vue.js", "JavaScript/TypeScript", "HTML5/CSS3", "Tailwind CSS", "Material-UI", "Bootstrap", "SCSS/SASS", "Flutter", "React Native", "PWA", "Responsive Design", "Webpack", "Vite"],
+    backend: ["Node.js", "Express.js", "Python Flask", "Django", "FastAPI", "MongoDB", "PostgreSQL", "MySQL", "Redis", "Firebase", "Supabase", "REST APIs", "GraphQL", "Socket.io", "JWT Authentication", "Prisma ORM", "Mongoose"],
+    devops_cloud: ["Docker", "Kubernetes", "GitHub Actions", "GitLab CI", "AWS (EC2, S3, Lambda)", "Google Cloud Platform", "Netlify", "Vercel", "Heroku", "CI/CD", "Git", "Linux/Ubuntu", "Nginx", "PM2"]
+  },
+  achievements: {
+    open_source: "24 public repositories with flagship AIMovieRecommender ⭐150+",
+    competitions: "1st Place – FAST Marathon; Winner – Twin-City Swimming; Finalist – National Critical-Thinking Tournament",
+    innovation: "Emotion-aware UX adopted by two client startups"
   }
 }
 
@@ -479,19 +520,21 @@ export default function UltimatePortfolio() {
                   <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </Button>
 
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className={`group magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-xl ${isDark
-                    ? "border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white bg-slate-900/50"
-                    : "border-slate-300 text-slate-700 hover:border-slate-400 hover:text-slate-900 bg-white/50"
-                    } backdrop-blur-sm`}
-                  onMouseEnter={() => setCursorVariant("hover")}
-                  onMouseLeave={() => setCursorVariant("default")}
-                >
-                  <Download className="mr-2 h-4 w-4 group-hover:animate-bounce" />
-                  Download Resume
-                </Button>
+                <Link href={portfolioData.resume} target="_blank" rel="noopener noreferrer">
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className={`group magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-xl ${isDark
+                      ? "border-slate-600 text-slate-300 hover:border-slate-400 hover:text-white bg-slate-900/50"
+                      : "border-slate-300 text-slate-700 hover:border-slate-400 hover:text-slate-900 bg-white/50"
+                      } backdrop-blur-sm`}
+                    onMouseEnter={() => setCursorVariant("hover")}
+                    onMouseLeave={() => setCursorVariant("default")}
+                  >
+                    <Download className="mr-2 h-4 w-4 group-hover:animate-bounce" />
+                    Download Resume
+                  </Button>
+                </Link>
               </div>
 
               {/* Social Links */}
@@ -507,6 +550,8 @@ export default function UltimatePortfolio() {
                   <Link
                     key={index}
                     href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className={`p-2 transition-all duration-300 hover:scale-125 hover:-translate-y-1 magnetic group ${isDark ? "text-slate-400" : "text-slate-500"
                       } ${social.color}`}
                     onMouseEnter={() => setCursorVariant("hover")}
@@ -530,7 +575,7 @@ export default function UltimatePortfolio() {
                     }`}
                 >
                   <Image
-                    src="/placeholder.svg?height=600&width=500"
+                    src="/images/muhammad-profile.jpg"
                     alt={portfolioData.name}
                     fill
                     className="object-cover group-hover:scale-110 transition-transform duration-700"
@@ -593,35 +638,39 @@ export default function UltimatePortfolio() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                name: "React",
+                name: "AI/ML",
                 level: 95,
-                icon: "⚛️",
+                icon: "🤖",
                 color: "from-blue-500 to-cyan-500",
-                description: "Frontend Framework",
+                description: "AI & Machine Learning",
+                skills: portfolioData.skills.ai_ml.slice(0, 6)
               },
               {
-                name: "TypeScript",
+                name: "Frontend",
                 level: 92,
-                icon: "📘",
-                color: "from-blue-600 to-blue-800",
-                description: "Type Safety",
+                icon: "⚛️",
+                color: "from-green-500 to-teal-500",
+                description: "Frontend Development",
+                skills: portfolioData.skills.frontend.slice(0, 6)
               },
               {
-                name: "Node.js",
-                level: 88,
-                icon: "🟢",
-                color: "from-green-500 to-green-700",
-                description: "Backend Runtime",
-              },
-              {
-                name: "Design",
-                level: 94,
-                icon: "🎨",
+                name: "Backend",
+                level: 90,
+                icon: "🔧",
                 color: "from-purple-500 to-pink-500",
-                description: "UI/UX Design",
+                description: "Backend Development",
+                skills: portfolioData.skills.backend.slice(0, 6)
+              },
+              {
+                name: "DevOps",
+                level: 88,
+                icon: "☁️",
+                color: "from-orange-500 to-red-500",
+                description: "DevOps & Cloud",
+                skills: portfolioData.skills.devops_cloud.slice(0, 6)
               },
             ].map((skill, index) => (
               <Card
@@ -680,6 +729,113 @@ export default function UltimatePortfolio() {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Experience Section */}
+      <section
+        ref={aboutRef}
+        id="about"
+        className={`py-20 px-6 lg:px-8 relative ${isDark ? "bg-slate-900/30" : "bg-slate-50/30"} backdrop-blur-sm`}
+      >
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16 translate-y-0 opacity-100 transition-all duration-1000">
+            <h2 className={`text-4xl font-bold mb-4 ${isDark ? "text-white" : "text-slate-900"}`}>
+              Experience & Achievements
+            </h2>
+            <p className={`text-xl ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+              My professional journey and key accomplishments
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-12 mb-16">
+            {portfolioData.experience.map((exp, index) => (
+              <Card
+                key={index}
+                className={`backdrop-blur-sm border transition-all duration-700 hover:shadow-2xl magnetic overflow-hidden translate-y-0 opacity-100 ${isDark
+                  ? "bg-slate-800/50 border-slate-700/50 hover:border-slate-600/50"
+                  : "bg-white/80 border-slate-200/50 hover:border-slate-300/50"
+                  }`}
+              >
+                <CardHeader>
+                  <CardTitle className={`text-xl ${isDark ? "text-white" : "text-slate-900"}`}>
+                    {exp.title}
+                  </CardTitle>
+                  <div className="flex justify-between items-center">
+                    <span className={`font-medium ${isDark ? "text-blue-400" : "text-blue-600"}`}>
+                      {exp.company}
+                    </span>
+                    <span className={`text-sm ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                      {exp.duration}
+                    </span>
+                  </div>
+                  <span className={`text-sm ${isDark ? "text-slate-500" : "text-slate-600"}`}>
+                    {exp.location}
+                  </span>
+                </CardHeader>
+                <CardContent>
+                  <p className={`mb-4 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                    {exp.description}
+                  </p>
+                  <div className="space-y-2">
+                    {exp.achievements.map((achievement, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <Star className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                        <span className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                          {achievement}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Achievements Section */}
+          <div className="grid md:grid-cols-3 gap-8">
+            <Card className={`backdrop-blur-sm border ${isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-white/80 border-slate-200/50"}`}>
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-teal-500 rounded-2xl mb-4 flex items-center justify-center text-2xl mx-auto">
+                  🏆
+                </div>
+                <h3 className={`font-bold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+                  Competitions
+                </h3>
+                <p className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                  {portfolioData.achievements.competitions}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className={`backdrop-blur-sm border ${isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-white/80 border-slate-200/50"}`}>
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl mb-4 flex items-center justify-center text-2xl mx-auto">
+                  🚀
+                </div>
+                <h3 className={`font-bold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+                  Open Source
+                </h3>
+                <p className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                  {portfolioData.achievements.open_source}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className={`backdrop-blur-sm border ${isDark ? "bg-slate-800/50 border-slate-700/50" : "bg-white/80 border-slate-200/50"}`}>
+              <CardContent className="p-6 text-center">
+                <div className="w-16 h-16 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl mb-4 flex items-center justify-center text-2xl mx-auto">
+                  💡
+                </div>
+                <h3 className={`font-bold mb-2 ${isDark ? "text-white" : "text-slate-900"}`}>
+                  Innovation
+                </h3>
+                <p className={`text-sm ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                  {portfolioData.achievements.innovation}
+                </p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
