@@ -215,6 +215,40 @@ export default function UltimatePortfolio() {
     }
   }
 
+  // Generate GitHub project image
+  const generateProjectImage = (repo: any) => {
+    // Use GitHub's OpenGraph social preview image as primary
+    // This automatically generates images for all repositories
+    return `https://opengraph.githubassets.com/1/${repo.owner.login}/${repo.name}`
+  }
+
+  // Get language-specific images
+  const getLanguageImage = (language: string) => {
+    const languageImages: { [key: string]: string } = {
+      'JavaScript': 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'TypeScript': 'https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Python': 'https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Java': 'https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'React': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Next.js': 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Vue': 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Angular': 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Node.js': 'https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'C++': 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'C#': 'https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Go': 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Rust': 'https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'PHP': 'https://images.unsplash.com/photo-1599507593362-e42bf69550fd?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Ruby': 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'HTML': 'https://images.unsplash.com/photo-1516259762381-22954d7d3ad2?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'CSS': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'Jupyter Notebook': 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80',
+      'default': 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop&crop=entropy&auto=format&q=80'
+    }
+
+    return languageImages[language] || languageImages['default']
+  }
+
   const fetchGitHubProjects = async () => {
     try {
       const response = await fetch("https://api.github.com/users/MuhammadKhan148/repos?sort=updated&per_page=100", {
@@ -250,7 +284,7 @@ export default function UltimatePortfolio() {
           id: repo.id.toString(),
           title: repo.name.replace(/-/g, " ").replace(/\b\w/g, (l: string) => l.toUpperCase()),
           description: repo.description || "No description available",
-          image: `/placeholder.svg?height=400&width=600`,
+          image: generateProjectImage(repo),
           tech: [repo.language, ...(repo.topics || [])].filter(Boolean).slice(0, 4),
           github: repo.html_url,
           demo: repo.homepage || repo.html_url,
@@ -333,6 +367,31 @@ export default function UltimatePortfolio() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" })
+    }
+  }
+
+  // Ensure smooth scrolling for all anchor links
+  useEffect(() => {
+    const handleAnchorClick = (e: Event) => {
+      const target = e.target as HTMLAnchorElement
+      if (target.href && target.href.includes('#')) {
+        const href = target.getAttribute('href')
+        if (href?.startsWith('#')) {
+          e.preventDefault()
+          const sectionId = href.substring(1)
+          scrollToSection(sectionId)
+        }
+      }
+    }
+
+    document.addEventListener('click', handleAnchorClick)
+    return () => document.removeEventListener('click', handleAnchorClick)
+  }, [])
 
   const toggleTheme = () => {
     setIsDark(!isDark)
@@ -639,18 +698,20 @@ ${formData.firstName} ${formData.lastName}
               <div
                 className="flex flex-col sm:flex-row gap-4"
               >
-                <Button
-                  size="lg"
-                  className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/25"
-                  onMouseEnter={() => setCursorVariant("hover")}
-                  onMouseLeave={() => setCursorVariant("default")}
-                >
-                  <span className="relative z-10 flex items-center">
-                    View My Work
-                    <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
-                  </span>
-                  <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </Button>
+                <Link href="#work">
+                  <Button
+                    size="lg"
+                    className="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white border-0 magnetic transform hover:scale-105 transition-all duration-300 hover:shadow-2xl hover:shadow-purple-500/25"
+                    onMouseEnter={() => setCursorVariant("hover")}
+                    onMouseLeave={() => setCursorVariant("default")}
+                  >
+                    <span className="relative z-10 flex items-center">
+                      View My Work
+                      <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  </Button>
+                </Link>
 
                 <Link href={portfolioData.resume} target="_blank" rel="noopener noreferrer">
                   <Button
@@ -1023,10 +1084,14 @@ ${formData.firstName} ${formData.lastName}
                 >
                   <div className="relative h-64 overflow-hidden">
                     <Image
-                      src={project.image || "/placeholder.svg"}
+                      src={project.image}
                       alt={project.title}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-700"
+                      onError={(e) => {
+                        const img = e.target as HTMLImageElement
+                        img.src = getLanguageImage(project.tech?.[0] || 'default')
+                      }}
                     />
 
                     <div
